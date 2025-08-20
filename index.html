@@ -1306,6 +1306,15 @@
             opacity: .3;
             transition: 0s;
         }
+        /* إزالة الإطار الأزرق عند النقر مع الحفاظ على إمكانية الوصول */
+.focus {
+    outline: none;
+}
+
+.focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
 
         /* تحسينات للشاشات الكبيرة */
         @media (min-width: 768px) {
