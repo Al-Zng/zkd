@@ -6,7 +6,6 @@
     <title>ZKD - قارئ المانهوا</title>
     <meta name="theme-color" content="#000000">
     <meta name="description" content="تطبيق قراءة المانهوا باللغة العربية - تجربة قراءة سلسة مثل تطبيق جوال">
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,8 +14,7 @@
             --primary-bg: #000000;
             --secondary-bg: #0a0a0a;
             --card-bg: #111111;
-            --accent-color: #ff2a6d;
-            --accent-gradient: linear-gradient(135deg, #ff2a6d 0%, #ff7c34 100%);
+            --accent-color: #ffffff;
             --text-primary: #ffffff;
             --text-secondary: #a0a0a0;
             --success-color: #00c896;
@@ -88,12 +86,13 @@
             width: 140px;
             height: 140px;
             margin-bottom: 30px;
-            background: var(--accent-gradient);
+            background: #222;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             animation: pulse 2s infinite;
+            border: 3px solid white;
         }
 
         .onboarding-logo i {
@@ -104,9 +103,7 @@
         .onboarding h1 {
             font-size: 32px;
             margin-bottom: 16px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent-color);
             font-weight: 800;
         }
 
@@ -133,7 +130,7 @@
             border-radius: var(--border-radius);
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .feature:hover {
@@ -144,27 +141,24 @@
         .feature i {
             font-size: 32px;
             margin-bottom: 15px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent-color);
         }
 
         .btn {
-            background: var(--accent-gradient);
+            background: #222;
             color: white;
-            border: none;
+            border: 2px solid white;
             padding: 16px 32px;
             border-radius: 50px;
             font-size: 18px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 42, 109, 0.3);
         }
 
         .btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 42, 109, 0.4);
+            background: #333;
         }
 
         .btn:active {
@@ -183,7 +177,7 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255,255,255,0.1);
             z-index: 1000;
         }
 
@@ -208,7 +202,7 @@
             bottom: -5px;
             width: 6px;
             height: 6px;
-            background: var(--accent-gradient);
+            background: var(--accent-color);
             border-radius: 50%;
         }
 
@@ -234,16 +228,14 @@
         .app-logo {
             font-size: 28px;
             font-weight: 900;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent-color);
         }
 
         .user-avatar {
             width: 45px;
             height: 45px;
             border-radius: 50%;
-            background: var(--accent-gradient);
+            background: #222;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -251,6 +243,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.3s ease;
+            border: 2px solid white;
         }
 
         .user-avatar:hover {
@@ -265,13 +258,12 @@
             padding: 12px 20px;
             margin-bottom: 25px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             transition: all 0.3s ease;
         }
 
         .search-bar:focus-within {
-            border-color: rgba(255,42,109,0.3);
-            box-shadow: 0 0 15px rgba(255,42,109,0.2);
+            border-color: rgba(255,255,255,0.3);
         }
 
         .search-bar input {
@@ -309,13 +301,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .tab.active {
-            background: var(--accent-gradient);
+            background: #222;
             color: white;
-            box-shadow: 0 4px 15px rgba(255, 42, 109, 0.3);
+            border-color: white;
         }
 
         .manhwa-grid {
@@ -330,14 +322,14 @@
             border-radius: var(--border-radius);
             overflow: hidden;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             position: relative;
         }
 
         .manhwa-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border-color: rgba(255,42,109,0.2);
+            border-color: rgba(255,255,255,0.3);
         }
 
         .manhwa-card img {
@@ -370,12 +362,13 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: var(--accent-gradient);
+            background: #222;
             color: white;
             padding: 4px 10px;
             border-radius: 50px;
             font-size: 12px;
             font-weight: 700;
+            border: 1px solid white;
         }
 
         /* قارئ المانهوا */
@@ -458,9 +451,7 @@
         .admin-title {
             font-size: 24px;
             font-weight: 800;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent-color);
         }
 
         .admin-actions {
@@ -476,22 +467,20 @@
             border-radius: var(--border-radius);
             text-align: center;
             transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
             cursor: pointer;
         }
 
         .admin-action:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border-color: rgba(255,42,109,0.2);
+            border-color: rgba(255,255,255,0.3);
         }
 
         .admin-action i {
             font-size: 32px;
             margin-bottom: 15px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent-color);
         }
 
         .admin-action p {
@@ -529,9 +518,7 @@
             font-size: 24px;
             font-weight: 800;
             margin-bottom: 20px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent-color);
         }
 
         .auth-buttons {
@@ -556,7 +543,7 @@
 
         .auth-btn.google {
             background: #ffffff;
-            color: #757575;
+            color: #333;
         }
 
         .auth-btn.google:hover {
@@ -644,6 +631,7 @@
                 --card-bg: #ffffff;
                 --text-primary: #333333;
                 --text-secondary: #666666;
+                --accent-color: #000000;
             }
 
             body {
@@ -656,6 +644,27 @@
 
             .search-bar input {
                 color: var(--text-primary);
+            }
+
+            .onboarding-logo {
+                background: #eee;
+                border-color: #000;
+            }
+
+            .btn {
+                background: #eee;
+                border-color: #000;
+                color: #000;
+            }
+
+            .btn:hover {
+                background: #ddd;
+            }
+
+            .user-avatar {
+                background: #eee;
+                border-color: #000;
+                color: #000;
             }
         }
 
@@ -675,6 +684,33 @@
         /* عناصر وهمية للبيانات */
         .dummy-content {
             display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        .admin-form {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.1);
         }
     </style>
 </head>
@@ -712,7 +748,7 @@
             <div id="home-page" style="display: none;">
                 <div class="home-header">
                     <div class="app-logo">ZKD</div>
-                    <div class="user-avatar" onclick="toggleAuthModal()">
+                    <div class="user-avatar" onclick="toggleAuthModal()" id="user-avatar">
                         <i class="fas fa-user"></i>
                     </div>
                 </div>
@@ -723,12 +759,11 @@
                 </div>
 
                 <div class="tabs">
-                    <div class="tab active" onclick="changeTab('popular')">الأكثر شهرة</div>
+                    <div class="tab active" onclick="changeTab('all')">الكل</div>
+                    <div class="tab" onclick="changeTab('popular')">الأكثر شهرة</div>
                     <div class="tab" onclick="changeTab('latest')">الأحدث</div>
-                    <div class="tab" onclick="changeTab('top-rated')">الأعلى تقييمًا</div>
                     <div class="tab" onclick="changeTab('action')">أكشن</div>
                     <div class="tab" onclick="changeTab('romance')">رومانسي</div>
-                    <div class="tab" onclick="changeTab('fantasy')">خيال</div>
                 </div>
 
                 <div class="manhwa-grid" id="manhwa-container">
@@ -762,14 +797,6 @@
                     <div class="admin-action ripple" onclick="showUserManager()">
                         <i class="fas fa-users"></i>
                         <p>إدارة المستخدمين</p>
-                    </div>
-                    <div class="admin-action ripple" onclick="showStats()">
-                        <i class="fas fa-chart-line"></i>
-                        <p>الإحصائيات</p>
-                    </div>
-                    <div class="admin-action ripple" onclick="showSettings()">
-                        <i class="fas fa-cog"></i>
-                        <p>الإعدادات</p>
                     </div>
                 </div>
 
@@ -844,13 +871,6 @@
         </div>
     </div>
 
-    <!-- بيانات وهمية للعرض (ستتم استبدالها ببيانات حقيقية من Supabase) -->
-    <div class="dummy-content">
-        <div id="dummy-manhwas">
-            <!-- بيانات وهمية للعرض -->
-        </div>
-    </div>
-
     <script>
         // تهيئة Supabase
         const supabaseUrl = 'https://dnhzgduojexngvconytx.supabase.co';
@@ -875,26 +895,52 @@
         async function initApp() {
             console.log('جاري تهيئة التطبيق...');
             
-            // محاكاة تحميل البيانات إذا فشل الاتصال بـ Supabase
-            setTimeout(() => {
-                if (manhwas.length === 0) {
-                    loadDummyData();
-                }
-            }, 3000);
+            // التحقق مما إذا كان المستخدم قد رأى شاشة الترحيب من قبل
+            const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+            if (hasSeenOnboarding) {
+                document.getElementById('onboarding').classList.add('hidden');
+                document.getElementById('home-page').style.display = 'block';
+            }
         }
 
         // التحقق من حالة المصادقة
         async function checkAuthState() {
             try {
+                // التحقق من وجود جلسة نشطة
                 const { data: { session }, error } = await supabase.auth.getSession();
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('خطأ في جلب الجلسة:', error.message);
+                    return;
+                }
                 
-                if (session && session.user) {
+                if (session) {
                     currentUser = session.user;
                     updateUIForUser();
                     checkAdminStatus();
+                    
+                    // إخفاء شاشة الترحيب إذا كان المستخدم مسجلاً
+                    document.getElementById('onboarding').classList.add('hidden');
+                    document.getElementById('home-page').style.display = 'block';
                 }
+                
+                // الاستماع لتغيرات حالة المصادقة
+                supabase.auth.onAuthStateChange(async (event, session) => {
+                    if (event === 'SIGNED_IN' && session) {
+                        currentUser = session.user;
+                        updateUIForUser();
+                        checkAdminStatus();
+                        closeAuthModal();
+                        
+                        // إخفاء شاشة الترحيب
+                        document.getElementById('onboarding').classList.add('hidden');
+                        document.getElementById('home-page').style.display = 'block';
+                    } else if (event === 'SIGNED_OUT') {
+                        currentUser = null;
+                        isAdmin = false;
+                        updateUIForUser();
+                    }
+                });
             } catch (error) {
                 console.error('خطأ في التحقق من حالة المصادقة:', error.message);
             }
@@ -903,67 +949,28 @@
         // تحميل المانهوا من Supabase
         async function loadManhwas() {
             try {
+                console.log('جاري تحميل المانهوا من Supabase...');
+                
                 const { data, error } = await supabase
                     .from('manhwas')
                     .select('*')
                     .order('created_at', { ascending: false });
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('خطأ في تحميل المانهوا:', error.message);
+                    return;
+                }
                 
                 if (data && data.length > 0) {
                     manhwas = data;
                     renderManhwas(manhwas);
+                    console.log('تم تحميل ' + data.length + ' مانهوا');
                 } else {
-                    loadDummyData();
+                    console.log('لا توجد مانهوا في قاعدة البيانات');
                 }
             } catch (error) {
                 console.error('خطأ في تحميل المانهوا:', error.message);
-                loadDummyData();
             }
-        }
-
-        // تحميل بيانات وهمية للعرض
-        function loadDummyData() {
-            manhwas = [
-                { 
-                    id: 1, 
-                    title: "المنعكس الإلهي", 
-                    description: "قصة شاب يعود إلى الوراء في الوقت لإصلاح أخطاء الماضي", 
-                    cover_url: "https://via.placeholder.com/300x400/ff2a6d/ffffff?text=المنعكس+الإلهي",
-                    chapters: [{ id: 1, title: "الفصل 125", number: 125 }],
-                    tags: ["أكشن", "خيال", "سفر عبر الزمن"],
-                    status: "مستمرة"
-                },
-                { 
-                    id: 2, 
-                    title: "سيد الأبطال", 
-                    description: "رحلة شاب ليصبح الأقوى في العالم", 
-                    cover_url: "https://via.placeholder.com/300x400/00c896/ffffff?text=سيد+الأبطال",
-                    chapters: [{ id: 2, title: "الفصل 89", number: 89 }],
-                    tags: ["أكشن", "قتال", "تطور"],
-                    status: "مستمرة"
-                },
-                { 
-                    id: 3, 
-                    title: "النخبة المتسولة", 
-                    description: "قصة طالب فقير يتحول إلى نخبة في المدرسة", 
-                    cover_url: "https://via.placeholder.com/300x400/9d4edd/ffffff?text=النخبة+المتسولة",
-                    chapters: [{ id: 3, title: "الفصل 204", number: 204 }],
-                    tags: ["رومانسي", "دراما", "مدرسة"],
-                    status: "مكتملة"
-                },
-                { 
-                    id: 4, 
-                    title: "الطريق إلى القمة", 
-                    description: "رحلة لاعب ليصبح الأسطوري في رياضة كرة القدم", 
-                    cover_url: "https://via.placeholder.com/300x400/ffcc00/000000?text=الطريق+إلى+القمة",
-                    chapters: [{ id: 4, title: "الفصل 76", number: 76 }],
-                    tags: ["رياضة", "تطور", "شونن"],
-                    status: "مستمرة"
-                }
-            ];
-            
-            renderManhwas(manhwas);
         }
 
         // عرض المانهوا في الشبكة
@@ -971,21 +978,27 @@
             const container = document.getElementById('manhwa-container');
             container.innerHTML = '';
             
+            if (manhwasToRender.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-book-open" style="font-size: 50px; margin-bottom: 20px; opacity: 0.5;"></i>
+                        <p>لا توجد مانهوا متاحة حالياً</p>
+                    </div>
+                `;
+                return;
+            }
+            
             manhwasToRender.forEach(manhwa => {
-                const lastChapter = manhwa.chapters && manhwa.chapters.length > 0 
-                    ? manhwa.chapters[manhwa.chapters.length - 1] 
-                    : { title: "لا يوجد فصول" };
-                
                 const card = document.createElement('div');
                 card.className = 'manhwa-card ripple';
                 card.onclick = () => showManhwaDetails(manhwa);
                 
                 card.innerHTML = `
-                    ${manhwa.status === 'جديد' ? '<div class="manhwa-badge">جديد</div>' : ''}
-                    <img src="${manhwa.cover_url}" alt="${manhwa.title}">
+                    ${manhwa.status === 'new' ? '<div class="manhwa-badge">جديد</div>' : ''}
+                    <img src="${manhwa.cover_url || 'https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا'}" alt="${manhwa.title}" onerror="this.src='https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا'">
                     <div class="manhwa-info">
                         <div class="manhwa-title">${manhwa.title}</div>
-                        <div class="manhwa-chapter">${lastChapter.title}</div>
+                        <div class="manhwa-chapter">الفصل ${manhwa.latest_chapter || 1}</div>
                     </div>
                 `;
                 
@@ -1002,7 +1015,7 @@
             
             const filtered = manhwas.filter(manhwa => 
                 manhwa.title.toLowerCase().includes(query.toLowerCase()) ||
-                (manhwa.tags && manhwa.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase())))
+                (manhwa.tags && manhwa.tags.toLowerCase().includes(query.toLowerCase()))
             );
             
             renderManhwas(filtered);
@@ -1013,16 +1026,15 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
             
-            // هنا يمكنك تصفية المانهوا حسب التبويب
-            // هذه مجرد أمثلة بسيطة للتصفية
-            let filtered = [];
+            // تصفية المانهوا حسب التبويب
+            let filtered = manhwas;
             
             switch(tabId) {
                 case 'popular':
-                    filtered = [...manhwas].sort((a, b) => b.views - a.views);
+                    filtered = [...manhwas].sort((a, b) => (b.views || 0) - (a.views || 0));
                     break;
                 case 'latest':
-                    filtered = [...manhwas].reverse();
+                    filtered = [...manhwas].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                     break;
                 case 'action':
                     filtered = manhwas.filter(m => m.tags && m.tags.includes('أكشن'));
@@ -1030,8 +1042,6 @@
                 case 'romance':
                     filtered = manhwas.filter(m => m.tags && m.tags.includes('رومانسي'));
                     break;
-                default:
-                    filtered = manhwas;
             }
             
             renderManhwas(filtered);
@@ -1039,38 +1049,34 @@
 
         // عرض تفاصيل المانهوا
         function showManhwaDetails(manhwa) {
-            // في التطبيق الكامل، سيتم الانتقال إلى صفحة التفاصيل
-            console.log('عرض تفاصيل:', manhwa.title);
-            
             // افتح القارئ للفصل الأول (محاكاة)
-            openReader(manhwa, manhwa.chapters[0]);
+            openReader(manhwa);
         }
 
         // فتح القارئ
-        function openReader(manhwa, chapter) {
-            currentChapter = chapter;
-            currentPage = 0;
+        function openReader(manhwa) {
+            currentChapter = manhwa;
             
-            document.getElementById('reader-title').textContent = `${manhwa.title} - ${chapter.title}`;
+            document.getElementById('reader-title').textContent = `${manhwa.title} - الفصل ${manhwa.latest_chapter || 1}`;
             document.getElementById('reader').style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
             // محاكاة تحميل الصفحات
-            loadChapterPages(manhwa, chapter);
+            loadChapterPages(manhwa);
         }
 
         // تحميل صفحات الفصل
-        async function loadChapterPages(manhwa, chapter) {
+        async function loadChapterPages(manhwa) {
             const readerContent = document.getElementById('reader-content');
             readerContent.innerHTML = '';
             
-            // محاكاة لصفحات المانهوا (في التطبيق الحقيقي، سيتم جلبها من Supabase)
+            // محاكاة لصفحات المانهوا
             for (let i = 1; i <= 5; i++) {
                 const pageDiv = document.createElement('div');
                 pageDiv.className = 'reader-page';
                 
                 // استخدام صور placeholder للعرض
-                pageDiv.innerHTML = `<img src="https://via.placeholder.com/400x600/333/cccccc?text=صفحة+${i}" alt="صفحة ${i}">`;
+                pageDiv.innerHTML = `<img src="https://via.placeholder.com/400x600/333/cccccc?text=صفحة+${i}+من+${manhwa.title}" alt="صفحة ${i}">`;
                 
                 readerContent.appendChild(pageDiv);
             }
@@ -1107,7 +1113,10 @@
                     }
                 });
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('خطأ في تسجيل الدخول:', error.message);
+                    alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
+                }
             } catch (error) {
                 console.error('خطأ في تسجيل الدخول:', error.message);
                 alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
@@ -1116,9 +1125,17 @@
 
         // تحديث واجهة المستخدم بعد تسجيل الدخول
         function updateUIForUser() {
-            const userAvatar = document.querySelector('.user-avatar');
+            const userAvatar = document.getElementById('user-avatar');
             if (currentUser) {
-                userAvatar.innerHTML = '<i class="fas fa-user-check"></i>';
+                // استخدام الأحرف الأولى من الاسم إذا كان متوفراً
+                const userName = currentUser.user_metadata?.full_name || currentUser.email;
+                const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
+                
+                userAvatar.innerHTML = initials.substring(0, 2);
+                userAvatar.title = userName;
+            } else {
+                userAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                userAvatar.title = 'تسجيل الدخول';
             }
         }
 
@@ -1174,6 +1191,9 @@
             const onboarding = document.getElementById('onboarding');
             onboarding.classList.add('hidden');
             
+            // حفظ في localStorage أن المستخدم قد رأى شاشة الترحيب
+            localStorage.setItem('hasSeenOnboarding', 'true');
+            
             setTimeout(() => {
                 document.getElementById('home-page').style.display = 'block';
             }, 500);
@@ -1203,42 +1223,89 @@
         function showAddManhwaForm() {
             const formsContainer = document.getElementById('admin-forms');
             formsContainer.innerHTML = `
-                <div style="margin-top: 30px; padding: 20px; background: var(--card-bg); border-radius: var(--border-radius);">
+                <div class="admin-form">
                     <h3>إضافة مانهوا جديدة</h3>
-                    <form onsubmit="event.preventDefault(); addNewManhwa();">
-                        <input type="text" placeholder="اسم المانهوا" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-primary);">
-                        <textarea placeholder="وصف المانهوا" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-primary); height: 100px;"></textarea>
-                        <input type="text" placeholder="رابط الصورة" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-primary);">
+                    <form onsubmit="event.preventDefault(); addNewManhwa(this);">
+                        <div class="form-group">
+                            <label>اسم المانهوا</label>
+                            <input type="text" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>وصف المانهوا</label>
+                            <textarea name="description" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>رابط الصورة</label>
+                            <input type="url" name="cover_url" required>
+                        </div>
+                        <div class="form-group">
+                            <label>التصنيفات</label>
+                            <input type="text" name="tags" placeholder="أكشن, رومانسي, خيال">
+                        </div>
                         <button type="submit" class="btn" style="width: 100%;">إضافة المانهوا</button>
                     </form>
                 </div>
             `;
         }
 
-        function addNewManhwa() {
-            alert('سيتم إضافة المانهوا في التطبيق الكامل');
-            // في التطبيق الكامل، سيتم إرسال البيانات إلى Supabase
+        async function addNewManhwa(form) {
+            try {
+                const formData = new FormData(form);
+                const manhwaData = {
+                    title: formData.get('title'),
+                    description: formData.get('description'),
+                    cover_url: formData.get('cover_url'),
+                    tags: formData.get('tags'),
+                    status: 'ongoing',
+                    latest_chapter: 1,
+                    views: 0
+                };
+                
+                const { data, error } = await supabase
+                    .from('manhwas')
+                    .insert([manhwaData])
+                    .select();
+                
+                if (error) throw error;
+                
+                alert('تم إضافة المانهوا بنجاح!');
+                document.getElementById('admin-forms').innerHTML = '';
+                loadManhwas(); // إعادة تحميل القائمة
+            } catch (error) {
+                console.error('خطأ في إضافة المانهوا:', error.message);
+                alert('حدث خطأ أثناء إضافة المانهوا: ' + error.message);
+            }
         }
 
         // وظائف أخرى للوحة الإدارة
         function showEditForm() {
-            alert('سيتم عرض نموذج التحرير في التطبيق الكامل');
+            const formsContainer = document.getElementById('admin-forms');
+            formsContainer.innerHTML = `
+                <div class="admin-form">
+                    <h3>تحرير المانهوا</h3>
+                    <p>سيتم عرض قائمة المانهوا للتحرير هنا</p>
+                </div>
+            `;
         }
 
         function showImageManager() {
-            alert('سيتم عرض مدير الصور في التطبيق الكامل');
+            const formsContainer = document.getElementById('admin-forms');
+            formsContainer.innerHTML = `
+                <div class="admin-form">
+                    <h3>إدارة الصور</h3>
+                    <p>سيتم عرض مدير الصور هنا</p>
+                </div>
+            `;
         }
 
         function showUserManager() {
-            alert('سيتم عرض مدير المستخدمين في التطبيق الكامل');
-        }
-
-        function showStats() {
-            alert('سيتم عرض الإحصائيات في التطبيق الكامل');
-        }
-
-        function showSettings() {
-            alert('سيتم عرض الإعدادات في التطبيق الكامل');
+            const formsContainer = document.getElementById('admin-forms');
+            formsContainer.innerHTML = `
+                <div class="admin-form">
+                    <h3>إدارة المستخدمين</h3>
+                    <p>سيتم عرض مدير المستخدمين هنا</p>
+                </div>
+            `;
         }
 
         // وظائف القارئ
@@ -1252,6 +1319,20 @@
 
         function downloadChapter() {
             alert('سيتم تنزيل الفصل في التطبيق الكامل');
+        }
+
+        // تسجيل الخروج
+        async function signOut() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                
+                currentUser = null;
+                isAdmin = false;
+                updateUIForUser();
+            } catch (error) {
+                console.error('خطأ في تسجيل الخروج:', error.message);
+            }
         }
     </script>
 </body>
