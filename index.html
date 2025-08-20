@@ -8,7 +8,8 @@
     <meta name="description" content="تطبيق قراءة المانهوا باللغة العربية - تجربة قراءة سلسة مثل تطبيق جوال">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-bg: #000000;
@@ -30,7 +31,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Tajawal', sans-serif;
         }
 
         body {
@@ -670,6 +671,11 @@
                 grid-template-columns: repeat(4, 1fr);
             }
         }
+
+        /* عناصر وهمية للبيانات */
+        .dummy-content {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -713,59 +719,20 @@
 
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="ابحث عن مانهوا أو فصل...">
+                    <input type="text" placeholder="ابحث عن مانهوا أو فصل..." onkeyup="searchManhwa(this.value)">
                 </div>
 
                 <div class="tabs">
-                    <div class="tab active">الأكثر شهرة</div>
-                    <div class="tab">الأحدث</div>
-                    <div class="tab">الأعلى تقييمًا</div>
-                    <div class="tab">أكشن</div>
-                    <div class="tab">رومانسي</div>
-                    <div class="tab">خيال علمي</div>
-                    <div class="tab">إيسيكاي</div>
+                    <div class="tab active" onclick="changeTab('popular')">الأكثر شهرة</div>
+                    <div class="tab" onclick="changeTab('latest')">الأحدث</div>
+                    <div class="tab" onclick="changeTab('top-rated')">الأعلى تقييمًا</div>
+                    <div class="tab" onclick="changeTab('action')">أكشن</div>
+                    <div class="tab" onclick="changeTab('romance')">رومانسي</div>
+                    <div class="tab" onclick="changeTab('fantasy')">خيال</div>
                 </div>
 
-                <div class="manhwa-grid">
-                    <!-- بطاقات المانهوا -->
-                    <div class="manhwa-card ripple" onclick="openReader()">
-                        <div class="manhwa-badge">جديد</div>
-                        <div style="height: 200px; background: linear-gradient(135deg, #ff2a6d 0%, #ff7c34 100%); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-image" style="font-size: 50px; color: rgba(255,255,255,0.7);"></i>
-                        </div>
-                        <div class="manhwa-info">
-                            <div class="manhwa-title">المنعكس الإلهي</div>
-                            <div class="manhwa-chapter">الفصل 125</div>
-                        </div>
-                    </div>
-                    <div class="manhwa-card ripple" onclick="openReader()">
-                        <div style="height: 200px; background: linear-gradient(135deg, #00c896 0%, #00a8ff 100%); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-image" style="font-size: 50px; color: rgba(255,255,255,0.7);"></i>
-                        </div>
-                        <div class="manhwa-info">
-                            <div class="manhwa-title">سيد الأبطال</div>
-                            <div class="manhwa-chapter">الفصل 89</div>
-                        </div>
-                    </div>
-                    <div class="manhwa-card ripple" onclick="openReader()">
-                        <div class="manhwa-badge">شائع</div>
-                        <div style="height: 200px; background: linear-gradient(135deg, #9d4edd 0%, #5a189a 100%); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-image" style="font-size: 50px; color: rgba(255,255,255,0.7);"></i>
-                        </div>
-                        <div class="manhwa-info">
-                            <div class="manhwa-title">النخبة المتسولة</div>
-                            <div class="manhwa-chapter">الفصل 204</div>
-                        </div>
-                    </div>
-                    <div class="manhwa-card ripple" onclick="openReader()">
-                        <div style="height: 200px; background: linear-gradient(135deg, #ffcc00 0%, #ff7b00 100%); display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-image" style="font-size: 50px; color: rgba(255,255,255,0.7);"></i>
-                        </div>
-                        <div class="manhwa-info">
-                            <div class="manhwa-title">الطريق إلى القمة</div>
-                            <div class="manhwa-chapter">الفصل 76</div>
-                        </div>
-                    </div>
+                <div class="manhwa-grid" id="manhwa-container">
+                    <!-- سيتم ملؤها بالبيانات من Supabase -->
                 </div>
             </div>
 
@@ -780,49 +747,53 @@
                 <p>إدارة المحتوى والإعدادات المتقدمة</p>
                 
                 <div class="admin-actions">
-                    <div class="admin-action ripple">
+                    <div class="admin-action ripple" onclick="showAddManhwaForm()">
                         <i class="fas fa-plus"></i>
                         <p>إضافة مانهوا</p>
                     </div>
-                    <div class="admin-action ripple">
+                    <div class="admin-action ripple" onclick="showEditForm()">
                         <i class="fas fa-edit"></i>
                         <p>تحرير المحتوى</p>
                     </div>
-                    <div class="admin-action ripple">
+                    <div class="admin-action ripple" onclick="showImageManager()">
                         <i class="fas fa-image"></i>
                         <p>إدارة الصور</p>
                     </div>
-                    <div class="admin-action ripple">
+                    <div class="admin-action ripple" onclick="showUserManager()">
                         <i class="fas fa-users"></i>
                         <p>إدارة المستخدمين</p>
                     </div>
-                    <div class="admin-action ripple">
+                    <div class="admin-action ripple" onclick="showStats()">
                         <i class="fas fa-chart-line"></i>
                         <p>الإحصائيات</p>
                     </div>
-                    <div class="admin-action ripple">
+                    <div class="admin-action ripple" onclick="showSettings()">
                         <i class="fas fa-cog"></i>
                         <p>الإعدادات</p>
                     </div>
+                </div>
+
+                <div id="admin-forms">
+                    <!-- سيتم عرض النماذج الإدارية هنا -->
                 </div>
             </div>
         </div>
 
         <!-- شريط التنقل السفلي -->
         <div class="bottom-nav">
-            <div class="nav-item active">
+            <div class="nav-item active" onclick="showSection('home')">
                 <i class="fas fa-home"></i>
                 <span>الرئيسية</span>
             </div>
-            <div class="nav-item">
+            <div class="nav-item" onclick="showSection('search')">
                 <i class="fas fa-search"></i>
                 <span>بحث</span>
             </div>
-            <div class="nav-item">
+            <div class="nav-item" onclick="showSection('bookmarks')">
                 <i class="fas fa-bookmark"></i>
                 <span>المحفوظات</span>
             </div>
-            <div class="nav-item">
+            <div class="nav-item" onclick="showSection('downloads')">
                 <i class="fas fa-download"></i>
                 <span>التنزيلات</span>
             </div>
@@ -836,26 +807,21 @@
         <div class="reader-container" id="reader">
             <div class="reader-header">
                 <i class="fas fa-arrow-right" onclick="closeReader()"></i>
-                <div>الفصل 125 - الصفحة 3</div>
-                <i class="fas fa-ellipsis-v"></i>
+                <div id="reader-title">الفصل 125 - الصفحة 3</div>
+                <i class="fas fa-ellipsis-v" onclick="showReaderOptions()"></i>
             </div>
             
-            <div class="reader-content">
-                <div class="reader-page">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjUwMCIgdmlld0JveD0iMCAwIDMwMCA1MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI1MDAiIGZpbGw9IiMxMTExMTEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE4Ij5QYWdlIENvbnRlbnQ8L3RleHQ+PC9zdmc+" alt="Page">
-                </div>
-                <div class="reader-page">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjUwMCIgdmlld0JveD0iMCAwIDMwMCA1MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI1MDAiIGZpbGw9IiMxMTExMTEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE4Ij5QYWdlIENvbnRlbnQ8L3RleHQ+PC9zdmc+" alt="Page">
-                </div>
+            <div class="reader-content" id="reader-content">
+                <!-- سيتم ملؤها بالصفحات -->
             </div>
             
             <div class="reader-controls">
-                <i class="fas fa-cog"></i>
+                <i class="fas fa-cog" onclick="showReaderSettings()"></i>
                 <div>
-                    <i class="fas fa-chevron-right"></i>
-                    <i class="fas fa-chevron-left"></i>
+                    <i class="fas fa-chevron-right" onclick="nextPage()"></i>
+                    <i class="fas fa-chevron-left" onclick="prevPage()"></i>
                 </div>
-                <i class="fas fa-download"></i>
+                <i class="fas fa-download" onclick="downloadChapter()"></i>
             </div>
         </div>
 
@@ -878,42 +844,239 @@
         </div>
     </div>
 
+    <!-- بيانات وهمية للعرض (ستتم استبدالها ببيانات حقيقية من Supabase) -->
+    <div class="dummy-content">
+        <div id="dummy-manhwas">
+            <!-- بيانات وهمية للعرض -->
+        </div>
+    </div>
+
     <script>
         // تهيئة Supabase
         const supabaseUrl = 'https://dnhzgduojexngvconytx.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuaHpnZHVvamV4bmd2Y29ueXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2NjM1NDYsImV4cCI6MjA3MTIzOTU0Nn0.84PMLVTIc-zbKqiBxG3sl1PSOi0Zqg8gaUAr4Go3Z38';
-        
-        // محاكاة بيانات التطبيق
-        const manhwas = [
-            { title: "المنعكس الإلهي", chapter: "الفصل 125", image: "", badge: "جديد" },
-            { title: "سيد الأبطال", chapter: "الفصل 89", image: "" },
-            { title: "النخبة المتسولة", chapter: "الفصل 204", image: "", badge: "شائع" },
-            { title: "الطريق إلى القمة", chapter: "الفصل 76", image: "" }
-        ];
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        // إخفاء شاشة الترحيب
-        function hideOnboarding() {
-            const onboarding = document.getElementById('onboarding');
-            onboarding.classList.add('hidden');
+        // حالة التطبيق
+        let currentUser = null;
+        let isAdmin = false;
+        let manhwas = [];
+        let currentChapter = null;
+        let currentPage = 0;
+
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            checkAuthState();
+            loadManhwas();
+        });
+
+        // تهيئة التطبيق
+        async function initApp() {
+            console.log('جاري تهيئة التطبيق...');
             
+            // محاكاة تحميل البيانات إذا فشل الاتصال بـ Supabase
             setTimeout(() => {
-                document.getElementById('home-page').style.display = 'block';
-                
-                // محاكاة تحميل المحتوى
-                simulateContentLoading();
-            }, 500);
+                if (manhwas.length === 0) {
+                    loadDummyData();
+                }
+            }, 3000);
         }
 
-        // محاكاة تحميل المحتوى
-        function simulateContentLoading() {
-            // في التطبيق الحقيقي، سيتم جلب البيانات من Supabase
-            console.log("جلب البيانات من Supabase...");
+        // التحقق من حالة المصادقة
+        async function checkAuthState() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) throw error;
+                
+                if (session && session.user) {
+                    currentUser = session.user;
+                    updateUIForUser();
+                    checkAdminStatus();
+                }
+            } catch (error) {
+                console.error('خطأ في التحقق من حالة المصادقة:', error.message);
+            }
+        }
+
+        // تحميل المانهوا من Supabase
+        async function loadManhwas() {
+            try {
+                const { data, error } = await supabase
+                    .from('manhwas')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                if (data && data.length > 0) {
+                    manhwas = data;
+                    renderManhwas(manhwas);
+                } else {
+                    loadDummyData();
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل المانهوا:', error.message);
+                loadDummyData();
+            }
+        }
+
+        // تحميل بيانات وهمية للعرض
+        function loadDummyData() {
+            manhwas = [
+                { 
+                    id: 1, 
+                    title: "المنعكس الإلهي", 
+                    description: "قصة شاب يعود إلى الوراء في الوقت لإصلاح أخطاء الماضي", 
+                    cover_url: "https://via.placeholder.com/300x400/ff2a6d/ffffff?text=المنعكس+الإلهي",
+                    chapters: [{ id: 1, title: "الفصل 125", number: 125 }],
+                    tags: ["أكشن", "خيال", "سفر عبر الزمن"],
+                    status: "مستمرة"
+                },
+                { 
+                    id: 2, 
+                    title: "سيد الأبطال", 
+                    description: "رحلة شاب ليصبح الأقوى في العالم", 
+                    cover_url: "https://via.placeholder.com/300x400/00c896/ffffff?text=سيد+الأبطال",
+                    chapters: [{ id: 2, title: "الفصل 89", number: 89 }],
+                    tags: ["أكشن", "قتال", "تطور"],
+                    status: "مستمرة"
+                },
+                { 
+                    id: 3, 
+                    title: "النخبة المتسولة", 
+                    description: "قصة طالب فقير يتحول إلى نخبة في المدرسة", 
+                    cover_url: "https://via.placeholder.com/300x400/9d4edd/ffffff?text=النخبة+المتسولة",
+                    chapters: [{ id: 3, title: "الفصل 204", number: 204 }],
+                    tags: ["رومانسي", "دراما", "مدرسة"],
+                    status: "مكتملة"
+                },
+                { 
+                    id: 4, 
+                    title: "الطريق إلى القمة", 
+                    description: "رحلة لاعب ليصبح الأسطوري في رياضة كرة القدم", 
+                    cover_url: "https://via.placeholder.com/300x400/ffcc00/000000?text=الطريق+إلى+القمة",
+                    chapters: [{ id: 4, title: "الفصل 76", number: 76 }],
+                    tags: ["رياضة", "تطور", "شونن"],
+                    status: "مستمرة"
+                }
+            ];
+            
+            renderManhwas(manhwas);
+        }
+
+        // عرض المانهوا في الشبكة
+        function renderManhwas(manhwasToRender) {
+            const container = document.getElementById('manhwa-container');
+            container.innerHTML = '';
+            
+            manhwasToRender.forEach(manhwa => {
+                const lastChapter = manhwa.chapters && manhwa.chapters.length > 0 
+                    ? manhwa.chapters[manhwa.chapters.length - 1] 
+                    : { title: "لا يوجد فصول" };
+                
+                const card = document.createElement('div');
+                card.className = 'manhwa-card ripple';
+                card.onclick = () => showManhwaDetails(manhwa);
+                
+                card.innerHTML = `
+                    ${manhwa.status === 'جديد' ? '<div class="manhwa-badge">جديد</div>' : ''}
+                    <img src="${manhwa.cover_url}" alt="${manhwa.title}">
+                    <div class="manhwa-info">
+                        <div class="manhwa-title">${manhwa.title}</div>
+                        <div class="manhwa-chapter">${lastChapter.title}</div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // البحث في المانهوا
+        function searchManhwa(query) {
+            if (!query.trim()) {
+                renderManhwas(manhwas);
+                return;
+            }
+            
+            const filtered = manhwas.filter(manhwa => 
+                manhwa.title.toLowerCase().includes(query.toLowerCase()) ||
+                (manhwa.tags && manhwa.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase())))
+            );
+            
+            renderManhwas(filtered);
+        }
+
+        // تغيير التبويب
+        function changeTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // هنا يمكنك تصفية المانهوا حسب التبويب
+            // هذه مجرد أمثلة بسيطة للتصفية
+            let filtered = [];
+            
+            switch(tabId) {
+                case 'popular':
+                    filtered = [...manhwas].sort((a, b) => b.views - a.views);
+                    break;
+                case 'latest':
+                    filtered = [...manhwas].reverse();
+                    break;
+                case 'action':
+                    filtered = manhwas.filter(m => m.tags && m.tags.includes('أكشن'));
+                    break;
+                case 'romance':
+                    filtered = manhwas.filter(m => m.tags && m.tags.includes('رومانسي'));
+                    break;
+                default:
+                    filtered = manhwas;
+            }
+            
+            renderManhwas(filtered);
+        }
+
+        // عرض تفاصيل المانهوا
+        function showManhwaDetails(manhwa) {
+            // في التطبيق الكامل، سيتم الانتقال إلى صفحة التفاصيل
+            console.log('عرض تفاصيل:', manhwa.title);
+            
+            // افتح القارئ للفصل الأول (محاكاة)
+            openReader(manhwa, manhwa.chapters[0]);
         }
 
         // فتح القارئ
-        function openReader() {
+        function openReader(manhwa, chapter) {
+            currentChapter = chapter;
+            currentPage = 0;
+            
+            document.getElementById('reader-title').textContent = `${manhwa.title} - ${chapter.title}`;
             document.getElementById('reader').style.display = 'flex';
             document.body.style.overflow = 'hidden';
+            
+            // محاكاة تحميل الصفحات
+            loadChapterPages(manhwa, chapter);
+        }
+
+        // تحميل صفحات الفصل
+        async function loadChapterPages(manhwa, chapter) {
+            const readerContent = document.getElementById('reader-content');
+            readerContent.innerHTML = '';
+            
+            // محاكاة لصفحات المانهوا (في التطبيق الحقيقي، سيتم جلبها من Supabase)
+            for (let i = 1; i <= 5; i++) {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'reader-page';
+                
+                // استخدام صور placeholder للعرض
+                pageDiv.innerHTML = `<img src="https://via.placeholder.com/400x600/333/cccccc?text=صفحة+${i}" alt="صفحة ${i}">`;
+                
+                readerContent.appendChild(pageDiv);
+            }
+            
+            // التمرير إلى الصفحة الأولى
+            readerContent.scrollTo(0, 0);
         }
 
         // إغلاق القارئ
@@ -922,30 +1085,98 @@
             document.body.style.overflow = 'auto';
         }
 
+        // الصفحة التالية
+        function nextPage() {
+            const readerContent = document.getElementById('reader-content');
+            readerContent.scrollBy(0, readerContent.clientHeight);
+        }
+
+        // الصفحة السابقة
+        function prevPage() {
+            const readerContent = document.getElementById('reader-content');
+            readerContent.scrollBy(0, -readerContent.clientHeight);
+        }
+
+        // تسجيل الدخول بحساب Google
+        async function signInWithGoogle() {
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin
+                    }
+                });
+                
+                if (error) throw error;
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error.message);
+                alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
+            }
+        }
+
+        // تحديث واجهة المستخدم بعد تسجيل الدخول
+        function updateUIForUser() {
+            const userAvatar = document.querySelector('.user-avatar');
+            if (currentUser) {
+                userAvatar.innerHTML = '<i class="fas fa-user-check"></i>';
+            }
+        }
+
+        // التحقق من صلاحية المستخدم للإدارة
+        async function checkAdminStatus() {
+            if (!currentUser) {
+                isAdmin = false;
+                return;
+            }
+            
+            try {
+                // في التطبيق الحقيقي، سيتم التحقق من قاعدة البيانات
+                // هذه محاكاة للتحقق من الصلاحية
+                const { data, error } = await supabase
+                    .from('admins')
+                    .select('user_id')
+                    .eq('user_id', currentUser.id)
+                    .single();
+                
+                isAdmin = !!data;
+            } catch (error) {
+                console.error('خطأ في التحقق من صلاحية الإدارة:', error.message);
+                isAdmin = false;
+            }
+        }
+
         // التبديل إلى لوحة الإدارة
         function toggleAdmin() {
             const adminPanel = document.getElementById('admin-panel');
             const homePage = document.getElementById('home-page');
             
+            if (!currentUser) {
+                toggleAuthModal();
+                return;
+            }
+            
+            if (!isAdmin) {
+                alert('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
+                return;
+            }
+            
             if (adminPanel.style.display === 'block') {
                 adminPanel.style.display = 'none';
                 homePage.style.display = 'block';
             } else {
-                // التحقق من صلاحية المستخدم للإدارة
-                const isAdmin = checkAdminStatus();
-                if (isAdmin) {
-                    adminPanel.style.display = 'block';
-                    homePage.style.display = 'none';
-                } else {
-                    toggleAuthModal();
-                }
+                adminPanel.style.display = 'block';
+                homePage.style.display = 'none';
             }
         }
 
-        // التحقق من صلاحية المستخدم للإدارة
-        function checkAdminStatus() {
-            // في التطبيق الحقيقي، سيتم التحقق من قاعدة البيانات
-            return false; // افتراضيًا غير مسجل دخول
+        // إخفاء شاشة الترحيب
+        function hideOnboarding() {
+            const onboarding = document.getElementById('onboarding');
+            onboarding.classList.add('hidden');
+            
+            setTimeout(() => {
+                document.getElementById('home-page').style.display = 'block';
+            }, 500);
         }
 
         // فتح/إغلاق نافذة تسجيل الدخول
@@ -962,53 +1193,66 @@
             document.getElementById('auth-modal').style.display = 'none';
         }
 
-        // تسجيل الدخول بحساب Google
-        function signInWithGoogle() {
-            // في التطبيق الحقيقي، سيتم استخدام مصادقة Supabase
-            console.log("جاري تسجيل الدخول بحساب Google...");
-            
-            // محاكاة تسجيل الدخول الناجح
-            setTimeout(() => {
-                alert('تم تسجيل الدخول بنجاح! في التطبيق الحقيقي، سيتصل هذا بـ Supabase.');
-                closeAuthModal();
-                
-                // تحديث واجهة المستخدم لتعكس حالة تسجيل الدخول
-                const userAvatar = document.querySelector('.user-avatar');
-                userAvatar.innerHTML = '<i class="fas fa-user-check"></i>';
-            }, 1000);
+        // عرض أقسام مختلفة
+        function showSection(section) {
+            alert(`سيتم عرض قسم ${section} في التطبيق الكامل`);
+            // في التطبيق الكامل، سيتم تحميل المحتوى المناسب لكل قسم
         }
 
-        // اكتشاف السحب (سيتم تطويره أكثر في التطبيق الكامل)
-        let startX = 0;
-        let startY = 0;
+        // وظائف الإدارة
+        function showAddManhwaForm() {
+            const formsContainer = document.getElementById('admin-forms');
+            formsContainer.innerHTML = `
+                <div style="margin-top: 30px; padding: 20px; background: var(--card-bg); border-radius: var(--border-radius);">
+                    <h3>إضافة مانهوا جديدة</h3>
+                    <form onsubmit="event.preventDefault(); addNewManhwa();">
+                        <input type="text" placeholder="اسم المانهوا" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-primary);">
+                        <textarea placeholder="وصف المانهوا" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-primary); height: 100px;"></textarea>
+                        <input type="text" placeholder="رابط الصورة" required style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-primary);">
+                        <button type="submit" class="btn" style="width: 100%;">إضافة المانهوا</button>
+                    </form>
+                </div>
+            `;
+        }
 
-        document.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        });
+        function addNewManhwa() {
+            alert('سيتم إضافة المانهوا في التطبيق الكامل');
+            // في التطبيق الكامل، سيتم إرسال البيانات إلى Supabase
+        }
 
-        document.addEventListener('touchend', (e) => {
-            const endX = e.changedTouches[0].clientX;
-            const endY = e.changedTouches[0].clientY;
-            const diffX = endX - startX;
-            const diffY = endY - startY;
+        // وظائف أخرى للوحة الإدارة
+        function showEditForm() {
+            alert('سيتم عرض نموذج التحرير في التطبيق الكامل');
+        }
 
-            // إذا كان السحب أفقياً بشكل أساسي
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-                if (diffX > 0) {
-                    console.log('سحب لليمين');
-                } else {
-                    console.log('سحب لليسار');
-                }
-            }
-        });
+        function showImageManager() {
+            alert('سيتم عرض مدير الصور في التطبيق الكامل');
+        }
 
-        // تهيئة التطبيق
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('تم تحميل التطبيق بنجاح!');
-            
-            // في التطبيق الحقيقي، سيتم تهيئة Supabase هنا
-        });
+        function showUserManager() {
+            alert('سيتم عرض مدير المستخدمين في التطبيق الكامل');
+        }
+
+        function showStats() {
+            alert('سيتم عرض الإحصائيات في التطبيق الكامل');
+        }
+
+        function showSettings() {
+            alert('سيتم عرض الإعدادات في التطبيق الكامل');
+        }
+
+        // وظائف القارئ
+        function showReaderOptions() {
+            alert('سيتم عرض خيارات القارئ في التطبيق الكامل');
+        }
+
+        function showReaderSettings() {
+            alert('سيتم عرض إعدادات القارئ في التطبيق الكامل');
+        }
+
+        function downloadChapter() {
+            alert('سيتم تنزيل الفصل في التطبيق الكامل');
+        }
     </script>
 </body>
 </html>
