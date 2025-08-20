@@ -56,8 +56,8 @@
             padding-bottom: calc(var(--nav-height) + 20px);
         }
 
-        /* شاشة الترحيب */
-        .onboarding {
+        /* شاشة تسجيل الدخول */
+        .auth-screen {
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -72,17 +72,9 @@
             right: 0;
             bottom: 0;
             z-index: 1000;
-            opacity: 1;
-            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        .onboarding.hidden {
-            opacity: 0;
-            transform: translateY(-20px);
-            pointer-events: none;
-        }
-
-        .onboarding-logo {
+        .auth-logo {
             width: 140px;
             height: 140px;
             margin-bottom: 30px;
@@ -91,23 +83,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: pulse 2s infinite;
             border: 3px solid white;
         }
 
-        .onboarding-logo i {
+        .auth-logo i {
             font-size: 60px;
             color: white;
         }
 
-        .onboarding h1 {
+        .auth-title {
             font-size: 32px;
             margin-bottom: 16px;
             color: var(--accent-color);
             font-weight: 800;
         }
 
-        .onboarding p {
+        .auth-subtitle {
             margin-bottom: 20px;
             color: var(--text-secondary);
             line-height: 1.6;
@@ -115,54 +106,46 @@
             max-width: 90%;
         }
 
-        .features {
+        .auth-buttons {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .auth-btn {
+            display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .feature {
-            width: 160px;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .feature:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        .feature i {
-            font-size: 32px;
-            margin-bottom: 15px;
-            color: var(--accent-color);
-        }
-
-        .btn {
-            background: #222;
-            color: white;
-            border: 2px solid white;
-            padding: 16px 32px;
+            gap: 10px;
+            padding: 15px;
             border-radius: 50px;
-            font-size: 18px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .btn:hover {
+        .auth-btn.google {
+            background: #ffffff;
+            color: #333;
+        }
+
+        .auth-btn.google:hover {
+            box-shadow: 0 5px 15px rgba(255,255,255,0.1);
             transform: translateY(-3px);
-            background: #333;
         }
 
-        .btn:active {
-            transform: translateY(0);
+        .auth-btn.guest {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        .auth-btn.guest:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
         }
 
         /* شريط التنقل السفلي */
@@ -371,6 +354,105 @@
             border: 1px solid white;
         }
 
+        /* صفحة معلومات المانهوا */
+        .manhwa-detail {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .manhwa-cover {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .manhwa-title-large {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .manhwa-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            background: var(--card-bg);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .manhwa-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .manhwa-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            background: var(--card-bg);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .chapters-list {
+            margin-top: 20px;
+        }
+
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .chapter-item:hover {
+            transform: translateX(-5px);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .chapter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #222;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .action-btn:hover {
+            background: #333;
+        }
+
         /* قارئ المانهوا */
         .reader-container {
             position: fixed;
@@ -434,6 +516,89 @@
             transition: opacity var(--transition-speed);
         }
 
+        /* صفحة الإعدادات */
+        .settings-page {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .settings-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .settings-group {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item label {
+            font-weight: 600;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #222;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
         /* لوحة الإدارة */
         .admin-panel {
             display: none;
@@ -488,71 +653,31 @@
             font-size: 16px;
         }
 
-        /* نافذة تسجيل الدخول */
-        .auth-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .auth-content {
-            background: var(--card-bg);
-            width: 90%;
-            max-width: 400px;
-            border-radius: var(--border-radius);
-            padding: 30px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-
-        .auth-title {
-            font-size: 24px;
-            font-weight: 800;
+        .form-group {
             margin-bottom: 20px;
-            color: var(--accent-color);
         }
 
-        .auth-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 25px;
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
-        .auth-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px;
-            border-radius: 50px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
         }
 
-        .auth-btn.google {
-            background: #ffffff;
-            color: #333;
-        }
-
-        .auth-btn.google:hover {
-            box-shadow: 0 5px 15px rgba(255,255,255,0.1);
-            transform: translateY(-3px);
-        }
-
-        .auth-btn i {
-            font-size: 20px;
+        .admin-form {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         /* تأثيرات والأنيميشن */
@@ -606,68 +731,6 @@
             transition: 0s;
         }
 
-        /* مؤشرات التحميل */
-        .skeleton {
-            background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: 8px;
-        }
-
-        @keyframes loading {
-            0% {
-                background-position: 200% 0;
-            }
-            100% {
-                background-position: -200% 0;
-            }
-        }
-
-        /* التكيف مع الوضع الفاتح */
-        @media (prefers-color-scheme: light) {
-            :root {
-                --primary-bg: #f5f5f5;
-                --secondary-bg: #ffffff;
-                --card-bg: #ffffff;
-                --text-primary: #333333;
-                --text-secondary: #666666;
-                --accent-color: #000000;
-            }
-
-            body {
-                background-color: var(--primary-bg);
-            }
-
-            .search-bar {
-                background: rgba(0,0,0,0.05);
-            }
-
-            .search-bar input {
-                color: var(--text-primary);
-            }
-
-            .onboarding-logo {
-                background: #eee;
-                border-color: #000;
-            }
-
-            .btn {
-                background: #eee;
-                border-color: #000;
-                color: #000;
-            }
-
-            .btn:hover {
-                background: #ddd;
-            }
-
-            .user-avatar {
-                background: #eee;
-                border-color: #000;
-                color: #000;
-            }
-        }
-
         /* تحسينات للشاشات الكبيرة */
         @media (min-width: 768px) {
             .manhwa-grid {
@@ -680,66 +743,28 @@
                 grid-template-columns: repeat(4, 1fr);
             }
         }
-
-        /* عناصر وهمية للبيانات */
-        .dummy-content {
-            display: none;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
-            color: var(--text-primary);
-        }
-
-        .admin-form {
-            margin-top: 30px;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- شاشة الترحيب -->
-        <div class="onboarding" id="onboarding">
-            <div class="onboarding-logo">
+        <!-- شاشة تسجيل الدخول -->
+        <div class="auth-screen" id="auth-screen">
+            <div class="auth-logo">
                 <i class="fas fa-book-open"></i>
             </div>
-            <h1>ZKD - قارئ المانهوا</h1>
-            <p>تجربة قراءة استثنائية تشعرك وكأنك في عالم المانهوا نفسه</p>
+            <h1 class="auth-title">ZKD - قارئ المانهوا</h1>
+            <p class="auth-subtitle">سجل الدخول للوصول إلى مكتبة المانهوا الكاملة</p>
             
-            <div class="features">
-                <div class="feature">
-                    <i class="fas fa-bolt"></i>
-                    <p>أسرع من التطبيقات</p>
+            <div class="auth-buttons">
+                <div class="auth-btn google" onclick="signInWithGoogle()">
+                    <i class="fab fa-google"></i>
+                    <span>التسجيل بحساب Google</span>
                 </div>
-                <div class="feature">
-                    <i class="fas fa-download"></i>
-                    <p>قراءة دون اتصال</p>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-book-open"></i>
-                    <p>تجربة قراءة سلسة</p>
+                <div class="auth-btn guest" onclick="signInAsGuest()">
+                    <i class="fas fa-user"></i>
+                    <span>الدخول كزائر</span>
                 </div>
             </div>
-            
-            <button class="btn ripple" onclick="hideOnboarding()">ابدأ القراءة الآن</button>
         </div>
 
         <!-- المحتوى الرئيسي -->
@@ -748,7 +773,7 @@
             <div id="home-page" style="display: none;">
                 <div class="home-header">
                     <div class="app-logo">ZKD</div>
-                    <div class="user-avatar" onclick="toggleAuthModal()" id="user-avatar">
+                    <div class="user-avatar" onclick="showUserMenu()" id="user-avatar">
                         <i class="fas fa-user"></i>
                     </div>
                 </div>
@@ -771,6 +796,78 @@
                 </div>
             </div>
 
+            <!-- صفحة معلومات المانهوا -->
+            <div class="manhwa-detail" id="manhwa-detail">
+                <button class="action-btn" onclick="goBack()" style="margin-bottom: 20px;">
+                    <i class="fas fa-arrow-right"></i> رجوع
+                </button>
+                
+                <img id="detail-cover" class="manhwa-cover" src="" alt="Manhwa Cover">
+                <h1 id="detail-title" class="manhwa-title-large"></h1>
+                
+                <div class="manhwa-meta">
+                    <span class="meta-item" id="detail-status"></span>
+                    <span class="meta-item" id="detail-chapters"></span>
+                    <span class="meta-item" id="detail-views"></span>
+                </div>
+                
+                <p id="detail-description" class="manhwa-description"></p>
+                
+                <div class="manhwa-tags" id="detail-tags"></div>
+                
+                <h3>الفصول</h3>
+                <div class="chapters-list" id="chapters-list">
+                    <!-- سيتم ملؤها بالفصول -->
+                </div>
+            </div>
+
+            <!-- صفحة الإعدادات -->
+            <div class="settings-page" id="settings-page">
+                <h2 class="settings-title">الإعدادات</h2>
+                
+                <div class="settings-group">
+                    <h3>إعدادات القراءة</h3>
+                    <div class="settings-item">
+                        <label>وضع القراءة من الأعلى إلى الأسفل</label>
+                        <label class="switch">
+                            <input type="checkbox" id="vertical-reading" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <label>التنزيل التلقائي للفصول</label>
+                        <label class="switch">
+                            <input type="checkbox" id="auto-download">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-item">
+                        <label>الإشعارات عن الفصول الجديدة</label>
+                        <label class="switch">
+                            <input type="checkbox" id="notifications" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3>الحساب</h3>
+                    <div class="settings-item">
+                        <span>طريقة التسجيل</span>
+                        <span id="login-method">زائر</span>
+                    </div>
+                    <div class="settings-item">
+                        <span>الحالة</span>
+                        <span id="account-status">غير نشط</span>
+                    </div>
+                    <div class="settings-item">
+                        <button class="action-btn" onclick="signOut()" style="width: 100%;">
+                            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- لوحة الإدارة -->
             <div class="admin-panel" id="admin-panel">
                 <div class="admin-header">
@@ -786,17 +883,17 @@
                         <i class="fas fa-plus"></i>
                         <p>إضافة مانهوا</p>
                     </div>
-                    <div class="admin-action ripple" onclick="showEditForm()">
+                    <div class="admin-action ripple" onclick="showAddChapterForm()">
                         <i class="fas fa-edit"></i>
-                        <p>تحرير المحتوى</p>
-                    </div>
-                    <div class="admin-action ripple" onclick="showImageManager()">
-                        <i class="fas fa-image"></i>
-                        <p>إدارة الصور</p>
+                        <p>إضافة فصل</p>
                     </div>
                     <div class="admin-action ripple" onclick="showUserManager()">
                         <i class="fas fa-users"></i>
                         <p>إدارة المستخدمين</p>
+                    </div>
+                    <div class="admin-action ripple" onclick="showStats()">
+                        <i class="fas fa-chart-line"></i>
+                        <p>الإحصائيات</p>
                     </div>
                 </div>
 
@@ -820,9 +917,9 @@
                 <i class="fas fa-bookmark"></i>
                 <span>المحفوظات</span>
             </div>
-            <div class="nav-item" onclick="showSection('downloads')">
-                <i class="fas fa-download"></i>
-                <span>التنزيلات</span>
+            <div class="nav-item" onclick="showSection('settings')">
+                <i class="fas fa-cog"></i>
+                <span>الإعدادات</span>
             </div>
             <div class="nav-item" onclick="toggleAdmin()">
                 <i class="fas fa-user-cog"></i>
@@ -834,7 +931,7 @@
         <div class="reader-container" id="reader">
             <div class="reader-header">
                 <i class="fas fa-arrow-right" onclick="closeReader()"></i>
-                <div id="reader-title">الفصل 125 - الصفحة 3</div>
+                <div id="reader-title">الفصل 1 - الصفحة 1</div>
                 <i class="fas fa-ellipsis-v" onclick="showReaderOptions()"></i>
             </div>
             
@@ -851,24 +948,6 @@
                 <i class="fas fa-download" onclick="downloadChapter()"></i>
             </div>
         </div>
-
-        <!-- نافذة تسجيل الدخول -->
-        <div class="auth-modal" id="auth-modal">
-            <div class="auth-content">
-                <div class="auth-title">تسجيل الدخول</div>
-                <p>سجل الدخول للوصول إلى جميع الميزات والمحتوى الحصري</p>
-                
-                <div class="auth-buttons">
-                    <div class="auth-btn google" onclick="signInWithGoogle()">
-                        <i class="fab fa-google"></i>
-                        <span>التسجيل بحساب Google</span>
-                    </div>
-                    <div class="auth-btn" style="background: rgba(255,255,255,0.05); color: var(--text-primary);" onclick="closeAuthModal()">
-                        <span>لاحقاً</span>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -880,70 +959,142 @@
         // حالة التطبيق
         let currentUser = null;
         let isAdmin = false;
+        let isGuest = false;
         let manhwas = [];
+        let currentManhwa = null;
         let currentChapter = null;
         let currentPage = 0;
+
+        // قائمة المسموح لهم بالإدارة
+        const adminEmails = [
+            'mohammedznger@gmail.com',
+            'admin@zkd.com'
+        ];
 
         // تهيئة التطبيق
         document.addEventListener('DOMContentLoaded', function() {
             initApp();
             checkAuthState();
-            loadManhwas();
         });
 
         // تهيئة التطبيق
         async function initApp() {
             console.log('جاري تهيئة التطبيق...');
             
-            // التحقق مما إذا كان المستخدم قد رأى شاشة الترحيب من قبل
-            const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-            if (hasSeenOnboarding) {
-                document.getElementById('onboarding').classList.add('hidden');
-                document.getElementById('home-page').style.display = 'block';
+            // معالجة مصادقة OAuth عند العودة من الصفحة
+            const { data, error } = await supabase.auth.getSession();
+            if (data.session) {
+                handleAuthSuccess(data.session.user);
             }
         }
 
         // التحقق من حالة المصادقة
         async function checkAuthState() {
             try {
-                // التحقق من وجود جلسة نشطة
-                const { data: { session }, error } = await supabase.auth.getSession();
-                
-                if (error) {
-                    console.error('خطأ في جلب الجلسة:', error.message);
-                    return;
-                }
-                
-                if (session) {
-                    currentUser = session.user;
-                    updateUIForUser();
-                    checkAdminStatus();
-                    
-                    // إخفاء شاشة الترحيب إذا كان المستخدم مسجلاً
-                    document.getElementById('onboarding').classList.add('hidden');
-                    document.getElementById('home-page').style.display = 'block';
-                }
-                
                 // الاستماع لتغيرات حالة المصادقة
                 supabase.auth.onAuthStateChange(async (event, session) => {
                     if (event === 'SIGNED_IN' && session) {
-                        currentUser = session.user;
-                        updateUIForUser();
-                        checkAdminStatus();
-                        closeAuthModal();
-                        
-                        // إخفاء شاشة الترحيب
-                        document.getElementById('onboarding').classList.add('hidden');
-                        document.getElementById('home-page').style.display = 'block';
+                        handleAuthSuccess(session.user);
                     } else if (event === 'SIGNED_OUT') {
-                        currentUser = null;
-                        isAdmin = false;
-                        updateUIForUser();
+                        handleSignOut();
+                    } else if (event === 'INITIAL_SESSION') {
+                        // الجلسة الأولية - لا تفعل شيئاً
                     }
                 });
             } catch (error) {
                 console.error('خطأ في التحقق من حالة المصادقة:', error.message);
             }
+        }
+
+        // معالجة تسجيل الدخول الناجح
+        function handleAuthSuccess(user) {
+            currentUser = user;
+            isGuest = false;
+            
+            // التحقق من صلاحية الإدارة
+            checkAdminStatus();
+            
+            // تحديث واجهة المستخدم
+            updateUIForUser();
+            
+            // إخفاء شاشة تسجيل الدخول
+            document.getElementById('auth-screen').style.display = 'none';
+            
+            // تحميل المحتوى
+            loadManhwas();
+            
+            // إظهار الصفحة الرئيسية
+            document.getElementById('home-page').style.display = 'block';
+        }
+
+        // الدخول كزائر
+        function signInAsGuest() {
+            isGuest = true;
+            currentUser = { email: 'guest@zkd.com', user_metadata: { full_name: 'زائر' } };
+            
+            // إخفاء شاشة تسجيل الدخول
+            document.getElementById('auth-screen').style.display = 'none';
+            
+            // تحميل المحتوى
+            loadManhwas();
+            
+            // إظهار الصفحة الرئيسية
+            document.getElementById('home-page').style.display = 'block';
+            
+            // تحديث واجهة المستخدم
+            updateUIForUser();
+        }
+
+        // تسجيل الدخول بحساب Google
+        async function signInWithGoogle() {
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: window.location.origin
+                    }
+                });
+                
+                if (error) {
+                    console.error('خطأ في تسجيل الدخول:', error.message);
+                    alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
+                }
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error.message);
+                alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
+            }
+        }
+
+        // تسجيل الخروج
+        async function signOut() {
+            try {
+                if (!isGuest) {
+                    const { error } = await supabase.auth.signOut();
+                    if (error) throw error;
+                }
+                
+                handleSignOut();
+            } catch (error) {
+                console.error('خطأ في تسجيل الخروج:', error.message);
+            }
+        }
+
+        // معالجة تسجيل الخروج
+        function handleSignOut() {
+            currentUser = null;
+            isAdmin = false;
+            isGuest = false;
+            
+            // إعادة تعيين الواجهة
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('manhwa-detail').style.display = 'none';
+            document.getElementById('settings-page').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'none';
+            
+            // إعادة تعيين الصفحة النشطة
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector('.nav-item:nth-child(1)').classList.add('active');
         }
 
         // تحميل المانهوا من Supabase
@@ -967,10 +1118,24 @@
                     console.log('تم تحميل ' + data.length + ' مانهوا');
                 } else {
                     console.log('لا توجد مانهوا في قاعدة البيانات');
+                    renderEmptyState();
                 }
             } catch (error) {
                 console.error('خطأ في تحميل المانهوا:', error.message);
+                renderEmptyState();
             }
+        }
+
+        // عرض حالة عدم وجود محتوى
+        function renderEmptyState() {
+            const container = document.getElementById('manhwa-container');
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <i class="fas fa-book-open" style="font-size: 50px; margin-bottom: 20px; opacity: 0.5;"></i>
+                    <p>لا توجد مانهوا متاحة حالياً</p>
+                    ${isAdmin ? '<button class="action-btn" onclick="showAddManhwaForm()" style="margin-top: 20px;">إضافة مانهوا</button>' : ''}
+                </div>
+            `;
         }
 
         // عرض المانهوا في الشبكة
@@ -979,12 +1144,7 @@
             container.innerHTML = '';
             
             if (manhwasToRender.length === 0) {
-                container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                        <i class="fas fa-book-open" style="font-size: 50px; margin-bottom: 20px; opacity: 0.5;"></i>
-                        <p>لا توجد مانهوا متاحة حالياً</p>
-                    </div>
-                `;
+                renderEmptyState();
                 return;
             }
             
@@ -1048,25 +1208,116 @@
         }
 
         // عرض تفاصيل المانهوا
-        function showManhwaDetails(manhwa) {
-            // افتح القارئ للفصل الأول (محاكاة)
-            openReader(manhwa);
+        async function showManhwaDetails(manhwa) {
+            currentManhwa = manhwa;
+            
+            // إخفاء الصفحة الرئيسية وإظهار صفحة التفاصيل
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('manhwa-detail').style.display = 'block';
+            
+            // تعبئة البيانات
+            document.getElementById('detail-cover').src = manhwa.cover_url || 'https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا';
+            document.getElementById('detail-title').textContent = manhwa.title;
+            document.getElementById('detail-status').textContent = manhwa.status === 'completed' ? 'مكتملة' : 'مستمرة';
+            document.getElementById('detail-chapters').textContent = `الفصول: ${manhwa.latest_chapter || 1}`;
+            document.getElementById('detail-views').textContent = `المشاهدات: ${manhwa.views || 0}`;
+            document.getElementById('detail-description').textContent = manhwa.description || 'لا يوجد وصف متاح';
+            
+            // عرض التصنيفات
+            const tagsContainer = document.getElementById('detail-tags');
+            tagsContainer.innerHTML = '';
+            
+            if (manhwa.tags) {
+                manhwa.tags.split(',').forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'tag';
+                    tagElement.textContent = tag.trim();
+                    tagsContainer.appendChild(tagElement);
+                });
+            }
+            
+            // تحميل وعرض الفصول
+            await loadChapters(manhwa.id);
+        }
+
+        // تحميل فصول المانهوا
+        async function loadChapters(manhwaId) {
+            try {
+                const { data, error } = await supabase
+                    .from('chapters')
+                    .select('*')
+                    .eq('manhwa_id', manhwaId)
+                    .order('chapter_number', { ascending: false });
+                
+                if (error) throw error;
+                
+                const chaptersList = document.getElementById('chapters-list');
+                chaptersList.innerHTML = '';
+                
+                if (data && data.length > 0) {
+                    data.forEach(chapter => {
+                        const chapterItem = document.createElement('div');
+                        chapterItem.className = 'chapter-item';
+                        
+                        chapterItem.innerHTML = `
+                            <div>
+                                <strong>الفصل ${chapter.chapter_number}</strong>
+                                <div>${new Date(chapter.created_at).toLocaleDateString('ar-EG')}</div>
+                            </div>
+                            <div class="chapter-actions">
+                                <button class="action-btn" onclick="readChapter(${chapter.id})">
+                                    <i class="fas fa-book-reader"></i> قراءة
+                                </button>
+                                <button class="action-btn" onclick="downloadChapter(${chapter.id})">
+                                    <i class="fas fa-download"></i> تحميل
+                                </button>
+                            </div>
+                        `;
+                        
+                        chaptersList.appendChild(chapterItem);
+                    });
+                } else {
+                    chaptersList.innerHTML = '<p>لا توجد فصول متاحة حالياً</p>';
+                }
+            } catch (error) {
+                console.error('خطأ في تحميل الفصول:', error.message);
+                document.getElementById('chapters-list').innerHTML = '<p>حدث خطأ في تحميل الفصول</p>';
+            }
+        }
+
+        // الرجوع من صفحة التفاصيل
+        function goBack() {
+            document.getElementById('manhwa-detail').style.display = 'none';
+            document.getElementById('home-page').style.display = 'block';
+        }
+
+        // قراءة الفصل
+        function readChapter(chapterId) {
+            // هنا سيتم فتح القارئ مع الفصل المحدد
+            alert(`سيتم فتح الفصل ${chapterId} في القارئ`);
+            // في التطبيق الكامل، سيتم تحميل صفحات الفصل وعرضها
+        }
+
+        // تحميل الفصل
+        function downloadChapter(chapterId) {
+            alert(`سيتم تحميل الفصل ${chapterId}`);
+            // في التطبيق الكامل، سيتم تحميل الفصل للتخزين المحلي
         }
 
         // فتح القارئ
-        function openReader(manhwa) {
-            currentChapter = manhwa;
+        function openReader(manhwa, chapter) {
+            currentChapter = chapter;
             
-            document.getElementById('reader-title').textContent = `${manhwa.title} - الفصل ${manhwa.latest_chapter || 1}`;
+            document.getElementById('reader-title').textContent = `${manhwa.title} - الفصل ${chapter.chapter_number}`;
             document.getElementById('reader').style.display = 'flex';
             document.body.style.overflow = 'hidden';
             
             // محاكاة تحميل الصفحات
-            loadChapterPages(manhwa);
+            loadChapterPages(manhwa, chapter);
         }
 
         // تحميل صفحات الفصل
-        async function loadChapterPages(manhwa) {
+        async function loadChapterPages(manhwa, chapter) {
             const readerContent = document.getElementById('reader-content');
             readerContent.innerHTML = '';
             
@@ -1103,36 +1354,22 @@
             readerContent.scrollBy(0, -readerContent.clientHeight);
         }
 
-        // تسجيل الدخول بحساب Google
-        async function signInWithGoogle() {
-            try {
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: window.location.origin
-                    }
-                });
-                
-                if (error) {
-                    console.error('خطأ في تسجيل الدخول:', error.message);
-                    alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
-                }
-            } catch (error) {
-                console.error('خطأ في تسجيل الدخول:', error.message);
-                alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
-            }
-        }
-
         // تحديث واجهة المستخدم بعد تسجيل الدخول
         function updateUIForUser() {
             const userAvatar = document.getElementById('user-avatar');
+            const loginMethod = document.getElementById('login-method');
+            const accountStatus = document.getElementById('account-status');
+            
             if (currentUser) {
                 // استخدام الأحرف الأولى من الاسم إذا كان متوفراً
                 const userName = currentUser.user_metadata?.full_name || currentUser.email;
                 const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
                 
-                userAvatar.innerHTML = initials.substring(0, 2);
+                userAvatar.innerHTML = isGuest ? '<i class="fas fa-user"></i>' : initials.substring(0, 2);
                 userAvatar.title = userName;
+                
+                loginMethod.textContent = isGuest ? 'زائر' : 'Google';
+                accountStatus.textContent = isGuest ? 'محدود' : 'نشط';
             } else {
                 userAvatar.innerHTML = '<i class="fas fa-user"></i>';
                 userAvatar.title = 'تسجيل الدخول';
@@ -1141,36 +1378,22 @@
 
         // التحقق من صلاحية المستخدم للإدارة
         async function checkAdminStatus() {
-            if (!currentUser) {
+            if (!currentUser || isGuest) {
                 isAdmin = false;
                 return;
             }
             
-            try {
-                // في التطبيق الحقيقي، سيتم التحقق من قاعدة البيانات
-                // هذه محاكاة للتحقق من الصلاحية
-                const { data, error } = await supabase
-                    .from('admins')
-                    .select('user_id')
-                    .eq('user_id', currentUser.id)
-                    .single();
-                
-                isAdmin = !!data;
-            } catch (error) {
-                console.error('خطأ في التحقق من صلاحية الإدارة:', error.message);
-                isAdmin = false;
-            }
+            // التحقق مما إذا كان البريد الإلكتروني للمستخدم موجوداً في القائمة المسموح بها
+            isAdmin = adminEmails.includes(currentUser.email);
+            console.log(`صلاحية الإدارة: ${isAdmin} للمستخدم: ${currentUser.email}`);
         }
 
         // التبديل إلى لوحة الإدارة
         function toggleAdmin() {
             const adminPanel = document.getElementById('admin-panel');
             const homePage = document.getElementById('home-page');
-            
-            if (!currentUser) {
-                toggleAuthModal();
-                return;
-            }
+            const manhwaDetail = document.getElementById('manhwa-detail');
+            const settingsPage = document.getElementById('settings-page');
             
             if (!isAdmin) {
                 alert('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
@@ -1183,40 +1406,42 @@
             } else {
                 adminPanel.style.display = 'block';
                 homePage.style.display = 'none';
+                manhwaDetail.style.display = 'none';
+                settingsPage.style.display = 'none';
             }
-        }
-
-        // إخفاء شاشة الترحيب
-        function hideOnboarding() {
-            const onboarding = document.getElementById('onboarding');
-            onboarding.classList.add('hidden');
-            
-            // حفظ في localStorage أن المستخدم قد رأى شاشة الترحيب
-            localStorage.setItem('hasSeenOnboarding', 'true');
-            
-            setTimeout(() => {
-                document.getElementById('home-page').style.display = 'block';
-            }, 500);
-        }
-
-        // فتح/إغلاق نافذة تسجيل الدخول
-        function toggleAuthModal() {
-            const authModal = document.getElementById('auth-modal');
-            if (authModal.style.display === 'flex') {
-                authModal.style.display = 'none';
-            } else {
-                authModal.style.display = 'flex';
-            }
-        }
-
-        function closeAuthModal() {
-            document.getElementById('auth-modal').style.display = 'none';
         }
 
         // عرض أقسام مختلفة
         function showSection(section) {
-            alert(`سيتم عرض قسم ${section} في التطبيق الكامل`);
-            // في التطبيق الكامل، سيتم تحميل المحتوى المناسب لكل قسم
+            // إخفاء جميع الأقسام أولاً
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('manhwa-detail').style.display = 'none';
+            document.getElementById('settings-page').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'none';
+            
+            // إلغاء تنشيط جميع عناصر القائمة
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            // تنشيط العنصر الحالي
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // إظهار القسم المطلوب
+            switch(section) {
+                case 'home':
+                    document.getElementById('home-page').style.display = 'block';
+                    loadManhwas();
+                    break;
+                case 'search':
+                    document.getElementById('home-page').style.display = 'block';
+                    // يمكن إضافة شريط بحث مخصص هنا
+                    break;
+                case 'bookmarks':
+                    alert('سيتم عرض المحفوظات في التطبيق الكامل');
+                    break;
+                case 'settings':
+                    document.getElementById('settings-page').style.display = 'block';
+                    break;
+            }
         }
 
         // وظائف الإدارة
@@ -1239,10 +1464,17 @@
                             <input type="url" name="cover_url" required>
                         </div>
                         <div class="form-group">
-                            <label>التصنيفات</label>
+                            <label>التصنيفات (مفصولة بفواصل)</label>
                             <input type="text" name="tags" placeholder="أكشن, رومانسي, خيال">
                         </div>
-                        <button type="submit" class="btn" style="width: 100%;">إضافة المانهوا</button>
+                        <div class="form-group">
+                            <label>الحالة</label>
+                            <select name="status">
+                                <option value="ongoing">مستمرة</option>
+                                <option value="completed">مكتملة</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="action-btn" style="width: 100%;">إضافة المانهوا</button>
                     </form>
                 </div>
             `;
@@ -1256,8 +1488,8 @@
                     description: formData.get('description'),
                     cover_url: formData.get('cover_url'),
                     tags: formData.get('tags'),
-                    status: 'ongoing',
-                    latest_chapter: 1,
+                    status: formData.get('status'),
+                    latest_chapter: 0,
                     views: 0
                 };
                 
@@ -1277,33 +1509,90 @@
             }
         }
 
+        function showAddChapterForm() {
+            if (!currentManhwa) {
+                alert('يرجى اختيار مانهوا أولاً');
+                return;
+            }
+            
+            const formsContainer = document.getElementById('admin-forms');
+            formsContainer.innerHTML = `
+                <div class="admin-form">
+                    <h3>إضافة فصل جديد لـ ${currentManhwa.title}</h3>
+                    <form onsubmit="event.preventDefault(); addNewChapter(this);">
+                        <div class="form-group">
+                            <label>رقم الفصل</label>
+                            <input type="number" name="chapter_number" value="${(currentManhwa.latest_chapter || 0) + 1}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>عنوان الفصل (اختياري)</label>
+                            <input type="text" name="title">
+                        </div>
+                        <div class="form-group">
+                            <label>رابط الصورة الأولى</label>
+                            <input type="url" name="cover_url">
+                        </div>
+                        <div class="form-group">
+                            <label>عدد الصفحات</label>
+                            <input type="number" name="pages_count" required>
+                        </div>
+                        <button type="submit" class="action-btn" style="width: 100%;">إضافة الفصل</button>
+                    </form>
+                </div>
+            `;
+        }
+
+        async function addNewChapter(form) {
+            try {
+                const formData = new FormData(form);
+                const chapterData = {
+                    manhwa_id: currentManhwa.id,
+                    chapter_number: parseInt(formData.get('chapter_number')),
+                    title: formData.get('title'),
+                    cover_url: formData.get('cover_url'),
+                    pages_count: parseInt(formData.get('pages_count'))
+                };
+                
+                const { data, error } = await supabase
+                    .from('chapters')
+                    .insert([chapterData])
+                    .select();
+                
+                if (error) throw error;
+                
+                // تحديث عدد الفصول في المانهوا
+                const { error: updateError } = await supabase
+                    .from('manhwas')
+                    .update({ latest_chapter: chapterData.chapter_number })
+                    .eq('id', currentManhwa.id);
+                
+                if (updateError) throw updateError;
+                
+                alert('تم إضافة الفصل بنجاح!');
+                document.getElementById('admin-forms').innerHTML = '';
+            } catch (error) {
+                console.error('خطأ في إضافة الفصل:', error.message);
+                alert('حدث خطأ أثناء إضافة الفصل: ' + error.message);
+            }
+        }
+
         // وظائف أخرى للوحة الإدارة
-        function showEditForm() {
-            const formsContainer = document.getElementById('admin-forms');
-            formsContainer.innerHTML = `
-                <div class="admin-form">
-                    <h3>تحرير المانهوا</h3>
-                    <p>سيتم عرض قائمة المانهوا للتحرير هنا</p>
-                </div>
-            `;
-        }
-
-        function showImageManager() {
-            const formsContainer = document.getElementById('admin-forms');
-            formsContainer.innerHTML = `
-                <div class="admin-form">
-                    <h3>إدارة الصور</h3>
-                    <p>سيتم عرض مدير الصور هنا</p>
-                </div>
-            `;
-        }
-
         function showUserManager() {
             const formsContainer = document.getElementById('admin-forms');
             formsContainer.innerHTML = `
                 <div class="admin-form">
                     <h3>إدارة المستخدمين</h3>
                     <p>سيتم عرض مدير المستخدمين هنا</p>
+                </div>
+            `;
+        }
+
+        function showStats() {
+            const formsContainer = document.getElementById('admin-forms');
+            formsContainer.innerHTML = `
+                <div class="admin-form">
+                    <h3>إحصائيات التطبيق</h3>
+                    <p>سيتم عرض الإحصائيات هنا</p>
                 </div>
             `;
         }
@@ -1317,21 +1606,25 @@
             alert('سيتم عرض إعدادات القارئ في التطبيق الكامل');
         }
 
-        function downloadChapter() {
-            alert('سيتم تنزيل الفصل في التطبيق الكامل');
-        }
-
-        // تسجيل الخروج
-        async function signOut() {
-            try {
-                const { error } = await supabase.auth.signOut();
-                if (error) throw error;
-                
-                currentUser = null;
-                isAdmin = false;
-                updateUIForUser();
-            } catch (error) {
-                console.error('خطأ في تسجيل الخروج:', error.message);
+        // عرض قائمة المستخدم
+        function showUserMenu() {
+            const menuItems = [];
+            
+            if (isAdmin) {
+                menuItems.push('لوحة الإدارة');
+            }
+            
+            menuItems.push('الإعدادات', 'تسجيل الخروج');
+            
+            const menuText = menuItems.map(item => `- ${item}`).join('\n');
+            const choice = prompt(`خيارات المستخدم:\n\n${menuText}\n\nاختر رقم الخيار:`);
+            
+            if (choice === '1' && isAdmin) {
+                toggleAdmin();
+            } else if (choice === '2' || (choice === '1' && !isAdmin)) {
+                showSection('settings');
+            } else if (choice === '3' || (choice === '2' && !isAdmin)) {
+                signOut();
             }
         }
     </script>
