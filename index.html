@@ -540,11 +540,13 @@
             font-size: 24px;
             font-weight: 800;
             margin-bottom: 5px;
+            text-align: center;
         }
 
         .profile-email {
             color: var(--text-secondary);
             margin-bottom: 15px;
+            text-align: center;
         }
 
         .profile-stats {
@@ -1278,35 +1280,6 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        /* تأثيرات اللمس */
-        .ripple {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ripple:after {
-            content: "";
-            display: block;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
-            background-repeat: no-repeat;
-            background-position: 50%;
-            transform: scale(10, 10);
-            opacity: 0;
-            transition: transform .5s, opacity 1s;
-        }
-
-        .ripple:active:after {
-            transform: scale(0, 0);
-            opacity: .3;
-            transition: 0s;
-        }
-
         /* تحسينات للشاشات الكبيرة */
         @media (min-width: 768px) {
             .manhwa-grid {
@@ -1597,19 +1570,19 @@
                     <p>إحصائيات وأداء التطبيق</p>
                     
                     <div class="admin-actions">
-                        <div class="admin-action ripple" onclick="showAddManhwaForm()">
+                        <div class="admin-action" onclick="showAddManhwaForm()">
                             <i class="fas fa-plus"></i>
                             <p>إضافة مانهوا</p>
                         </div>
-                        <div class="admin-action ripple" onclick="showAddChapterForm()">
+                        <div class="admin-action" onclick="showAddChapterForm()">
                             <i class="fas fa-edit"></i>
                             <p>إضافة فصل</p>
                         </div>
-                        <div class="admin-action ripple" onclick="changeAdminTab(null, 'users')">
+                        <div class="admin-action" onclick="changeAdminTab(null, 'users')">
                             <i class="fas fa-users"></i>
                             <p>إدارة المستخدمين</p>
                         </div>
-                        <div class="admin-action ripple" onclick="showStats()">
+                        <div class="admin-action" onclick="showStats()">
                             <i class="fas fa-chart-line"></i>
                             <p>الإحصائيات</p>
                         </div>
@@ -1617,7 +1590,7 @@
                     
                     <div class="admin-form">
                         <h3>إحصائيات سريعة</h3>
-                        <div class="stats-grid">
+                        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
                             <div class="stat-item">
                                 <div class="stat-value" id="admin-total-manhwas">0</div>
                                 <div class="stat-label">عدد المانهوا</div>
@@ -1767,7 +1740,7 @@
                 <i class="fas fa-bookmark"></i>
                 <span>المحفوظات</span>
             </div>
-            <div class="nav-item" id="settings-nav" onmousedown="startLongPress()" onmouseup="endLongPress()" ontouchstart="startLongPress()" ontouchend="endLongPress()">
+            <div class="nav-item" id="settings-nav" onclick="showSection('settings')" onmousedown="startLongPress()" onmouseup="endLongPress()" ontouchstart="startLongPress()" ontouchend="endLongPress()">
                 <i class="fas fa-cog"></i>
                 <span>الإعدادات</span>
             </div>
@@ -2074,7 +2047,7 @@
             
             manhwasToRender.forEach(manhwa => {
                 const card = document.createElement('div');
-                card.className = 'manhwa-card ripple';
+                card.className = 'manhwa-card';
                 card.onclick = () => showManhwaDetails(manhwa);
                 
                 // التحقق إذا كانت المانهوا في قوائم المستخدم
@@ -2404,6 +2377,7 @@
         function goBack() {
             document.getElementById('manhwa-detail').style.display = 'none';
             document.getElementById('profile-page').style.display = 'none';
+            document.getElementById('settings-page').style.display = 'none';
             document.getElementById('home-page').style.display = 'block';
         }
 
@@ -3324,7 +3298,18 @@
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             
             // تنشيط العنصر الحالي
-            event.target.closest('.nav-item').classList.add('active');
+            const navItems = document.querySelectorAll('.nav-item');
+            switch(section) {
+                case 'home':
+                    navItems[0].classList.add('active');
+                    break;
+                case 'search':
+                    navItems[1].classList.add('active');
+                    break;
+                case 'settings':
+                    navItems[3].classList.add('active');
+                    break;
+            }
             
             // إظهار القسم المطلوب
             switch(section) {
@@ -3498,4 +3483,4 @@
         }
     </script>
 </body>
-  </html>
+</html>
