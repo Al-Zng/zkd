@@ -2307,18 +2307,27 @@
                         
                         const authorName = comment.profiles?.username || 'مستخدم';
                         const avatarText = authorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                        const isOwnComment = currentUser && comment.user_id === currentUser.id;
                         
                         commentItem.innerHTML = `
                             <div class="comment-header">
                                 <div class="comment-avatar">${avatarText}</div>
                                 <div class="comment-author">${authorName}</div>
-                                <div class="comment-time">${new Date(comment.created_at).toLocaleDateString('ar-EG')}</div>
+                                <div class="comment-time">${formatTime(comment.created_at)}</div>
                             </div>
                             <div class="comment-content">${comment.content}</div>
                             <div class="comment-actions">
                                 <span class="comment-action" onclick="likeComment(${comment.id})">
                                     <i class="far fa-thumbs-up"></i> أعجبني
                                 </span>
+                                ${isOwnComment ? `
+                                <span class="comment-action" onclick="editComment(${comment.id})">
+                                    <i class="fas fa-edit"></i> تعديل
+                                </span>
+                                <span class="comment-action" onclick="deleteComment(${comment.id})">
+                                    <i class="fas fa-trash"></i> حذف
+                                </span>
+                                ` : ''}
                                 <span class="comment-action" onclick="reportComment(${comment.id})">
                                     <i class="far fa-flag"></i> بلغ
                                 </span>
@@ -2336,6 +2345,24 @@
             }
         }
 
+        // تنسيق الوقت
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (minutes < 1) return 'الآن';
+            if (minutes < 60) return `منذ ${minutes} دقيقة`;
+            if (hours < 24) return `منذ ${hours} ساعة`;
+            if (days < 7) return `منذ ${days} يوم`;
+            
+            return date.toLocaleDateString('ar-EG');
+        }
+
         // إضافة تعليق
         async function addComment() {
             if (!currentManhwa) return;
@@ -2345,6 +2372,11 @@
             
             if (!content) {
                 alert('يرجى كتابة تعليق');
+                return;
+            }
+            
+            if (!currentUser) {
+                alert('يجب تسجيل الدخول لإضافة تعليق');
                 return;
             }
             
@@ -2370,6 +2402,103 @@
             } catch (error) {
                 console.error('خطأ في إضافة التعليق:', error.message);
                 alert('حدث خطأ في إضافة التعليق: ' + error.message);
+            }
+        }
+
+        // تعديل التعليق
+        async function editComment(commentId) {
+            const newContent = prompt('يرجى إدخال النص الجديد للتعليق:');
+            if (!newContent || !newContent.trim()) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('comments')
+                    .update({ content: newContent.trim() })
+                    .eq('id', commentId)
+                    .eq('user_id', currentUser.id);
+                
+                if (error) throw error;
+                
+                await loadComments(currentManhwa.id);
+            } catch (error) {
+                console.error('خطأ في تعديل التعليق:', error.message);
+                alert('حدث خطأ في تعديل التعليق: ' + error.message);
+            }
+        }
+
+        // حذف التعليق
+        async function deleteComment(commentId) {
+            if (!confirm('هل أنت متأكد من حذف هذا التعليق؟ لا يمكن التراجع عن هذا الإجراء.')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('comments')
+                    .delete()
+                    .eq('id', commentId)
+                    .eq('user_id', currentUser.id);
+                
+                if (error) throw error;
+                
+                await loadComments(currentManhwa.id);
+            } catch (error) {
+                console.error('خطأ في حذف التعليق:', error.message);
+                alert('حدث خطأ في حذف التعليق: ' + error.message);
+            }
+        }
+
+        // الإعجاب بالتعليق
+        async function likeComment(commentId) {
+            if (!currentUser) {
+                alert('يجب تسجيل الدخول للإعجاب بالتعليق');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('likes')
+                    .insert([
+                        { 
+                            comment_id: commentId, 
+                            user_id: currentUser.id
+                        }
+                    ]);
+                
+                if (error) throw error;
+                
+                alert('تم الإعجاب بالتعليق بنجاح');
+            } catch (error) {
+                console.error('خطأ في الإعجاب بالتعليق:', error.message);
+                alert('حدث خطأ في الإعجاب بالتعليق: ' + error.message);
+            }
+        }
+
+        // الإبلاغ عن التعليق
+        async function reportComment(commentId) {
+            if (!currentUser) {
+                alert('يجب تسجيل الدخول للإبلاغ عن التعليق');
+                return;
+            }
+            
+            const reason = prompt('يرجى إدخال سبب الإبلاغ عن هذا التعليق:');
+            if (!reason) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('reports')
+                    .insert([
+                        { 
+                            comment_id: commentId, 
+                            user_id: currentUser.id,
+                            reason: reason
+                        }
+                    ]);
+                
+                if (error) throw error;
+                
+                alert('تم الإبلاغ عن التعليق بنجاح، شكراً لك على مساعدتنا في الحفاظ على المجتمع');
+            } catch (error) {
+                console.error('خطأ في الإبلاغ عن التعليق:', error.message);
+                alert('حدث خطأ في الإبلاغ عن التعليق: ' + error.message);
             }
         }
 
@@ -3036,56 +3165,256 @@
 
         // تحميل المستخدمين للإدارة
         async function loadAdminUsers() {
-            // سيتم تنفيذها في التطبيق الكامل
-            document.getElementById('admin-users-list').innerHTML = '<p>سيتم تحميل قائمة المستخدمين هنا</p>';
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const usersList = document.getElementById('admin-users-list');
+                usersList.innerHTML = '';
+                
+                if (data && data.length > 0) {
+                    data.forEach(user => {
+                        const listItem = document.createElement('div');
+                        listItem.className = 'admin-list-item';
+                        
+                        listItem.innerHTML = `
+                            <div class="admin-list-item-info">
+                                <div class="admin-list-item-title">${user.username || user.email}</div>
+                                <div class="admin-list-item-meta">
+                                    ${user.email} | 
+                                    ${new Date(user.created_at).toLocaleDateString('ar-EG')}
+                                </div>
+                            </div>
+                            <div class="admin-list-item-actions">
+                                <button class="action-btn" onclick="viewUserProfile('${user.id}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="toggleUserStatus('${user.id}')" style="background: ${user.is_banned ? 'var(--success-color)' : 'var(--error-color)'};">
+                                    <i class="fas ${user.is_banned ? 'fa-check' : 'fa-ban'}"></i>
+                                </button>
+                            </div>
+                        `;
+                        
+                        usersList.appendChild(listItem);
+                    });
+                } else {
+                    usersList.innerHTML = '<p>لا توجد مستخدمين</p>';
+                }
+                
+            } catch (error) {
+                console.error('خطأ في تحميل المستخدمين للإدارة:', error.message);
+                document.getElementById('admin-users-list').innerHTML = '<p>حدث خطأ في تحميل البيانات</p>';
+            }
         }
 
         // تحميل التبليغات للإدارة
         async function loadAdminReports() {
-            // سيتم تنفيذها في التطبيق الكامل
-            document.getElementById('admin-reports-list').innerHTML = '<p>سيتم تحميل قائمة التبليغات هنا</p>';
+            try {
+                const { data, error } = await supabase
+                    .from('reports')
+                    .select(`
+                        *,
+                        comments (content, user_id),
+                        profiles (username)
+                    `)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const reportsList = document.getElementById('admin-reports-list');
+                reportsList.innerHTML = '';
+                
+                if (data && data.length > 0) {
+                    data.forEach(report => {
+                        const listItem = document.createElement('div');
+                        listItem.className = 'admin-list-item';
+                        
+                        listItem.innerHTML = `
+                            <div class="admin-list-item-info">
+                                <div class="admin-list-item-title">تبليغ عن تعليق</div>
+                                <div class="admin-list-item-meta">
+                                    ${report.comments?.content?.substring(0, 50) || 'تعليق محذوف'}... | 
+                                    المبلغ: ${report.profiles?.username || 'مستخدم'} | 
+                                    السبب: ${report.reason}
+                                </div>
+                            </div>
+                            <div class="admin-list-item-actions">
+                                <button class="action-btn" onclick="viewReportDetails(${report.id})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" onclick="resolveReport(${report.id})" style="background: var(--success-color);">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                        `;
+                        
+                        reportsList.appendChild(listItem);
+                    });
+                } else {
+                    reportsList.innerHTML = '<p>لا توجد تبليغات</p>';
+                }
+                
+            } catch (error) {
+                console.error('خطأ في تحميل التبليغات للإدارة:', error.message);
+                document.getElementById('admin-reports-list').innerHTML = '<p>حدث خطأ في تحميل البيانات</p>';
+            }
         }
 
         // تحميل محادثة الإداريين
         async function loadAdminChat() {
-            // سيتم تنفيذها في التطبيق الكامل
-            document.getElementById('admin-chat-messages').innerHTML = `
-                <div class="chat-message other">
-                    <div class="chat-message-sender">المدير 1</div>
-                    <div class="chat-message-content">مرحباً بك في محادثة الإداريين!</div>
-                    <div class="chat-message-time">12:30</div>
-                </div>
-                <div class="chat-message self">
-                    <div class="chat-message-sender">أنت</div>
-                    <div class="chat-message-content">شكراً، سأستخدم هذه المساحة للتواصل مع الفريق</div>
-                    <div class="chat-message-time">12:32</div>
-                </div>
-            `;
+            try {
+                // الحصول على المحادثات
+                const { data: conversations, error: convError } = await supabase
+                    .from('conversations')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                
+                if (convError) throw convError;
+                
+                let conversationId;
+                
+                if (conversations && conversations.length > 0) {
+                    conversationId = conversations[0].id;
+                } else {
+                    // إنشاء محادثة جديدة إذا لم توجد
+                    const { data: newConversation, error: newConvError } = await supabase
+                        .from('conversations')
+                        .insert([
+                            { 
+                                title: "محادثة الإداريين", 
+                                created_by: currentUser.id 
+                            }
+                        ])
+                        .select()
+                        .single();
+                    
+                    if (newConvError) throw newConvError;
+                    
+                    conversationId = newConversation.id;
+                }
+                
+                // الحصول على الرسائل
+                const { data: messages, error: msgError } = await supabase
+                    .from('messages')
+                    .select(`
+                        *,
+                        profiles (username, avatar_url)
+                    `)
+                    .eq('conversation_id', conversationId)
+                    .order('created_at', { ascending: true });
+                
+                if (msgError) throw msgError;
+                
+                // عرض الرسائل
+                const messagesContainer = document.getElementById('admin-chat-messages');
+                messagesContainer.innerHTML = '';
+                
+                if (messages && messages.length > 0) {
+                    messages.forEach(message => {
+                        const isSelf = message.user_id === currentUser.id;
+                        const authorName = message.profiles?.username || 'مستخدم';
+                        const avatarText = authorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                        
+                        const messageElement = document.createElement('div');
+                        messageElement.className = `chat-message ${isSelf ? 'self' : 'other'}`;
+                        
+                        messageElement.innerHTML = `
+                            <div class="chat-message-sender">${isSelf ? 'أنت' : authorName}</div>
+                            <div class="chat-message-content">${message.content}</div>
+                            <div class="chat-message-time">${formatTime(message.created_at)}</div>
+                        `;
+                        
+                        messagesContainer.appendChild(messageElement);
+                    });
+                    
+                    // التمرير إلى أحدث رسالة
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+                
+            } catch (error) {
+                console.error('خطأ في تحميل محادثة الإداريين:', error.message);
+                document.getElementById('admin-chat-messages').innerHTML = '<p>حدث خطأ في تحميل المحادثة</p>';
+            }
         }
 
         // إرسال رسالة في محادثة الإداريين
-        function sendAdminMessage() {
+        async function sendAdminMessage() {
             const input = document.getElementById('admin-chat-input');
             const content = input.value.trim();
             
             if (!content) return;
             
-            const messagesContainer = document.getElementById('admin-chat-messages');
-            
-            // إضافة الرسالة (محاكاة)
-            const messageElement = document.createElement('div');
-            messageElement.className = 'chat-message self';
-            messageElement.innerHTML = `
-                <div class="chat-message-sender">أنت</div>
-                <div class="chat-message-content">${content}</div>
-                <div class="chat-message-time">${new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}</div>
-            `;
-            
-            messagesContainer.appendChild(messageElement);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
-            // مسح حقل الإدخال
-            input.value = '';
+            try {
+                // الحصول على محادثة الإداريين (نفترض وجود محادثة واحدة)
+                const { data: conversations, error: convError } = await supabase
+                    .from('conversations')
+                    .select('id')
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+                
+                if (convError) throw convError;
+                
+                let conversationId;
+                
+                if (conversations && conversations.length > 0) {
+                    conversationId = conversations[0].id;
+                } else {
+                    // إنشاء محادثة جديدة إذا لم توجد
+                    const { data: newConversation, error: newConvError } = await supabase
+                        .from('conversations')
+                        .insert([
+                            { 
+                                title: "محادثة الإداريين", 
+                                created_by: currentUser.id 
+                            }
+                        ])
+                        .select()
+                        .single();
+                    
+                    if (newConvError) throw newConvError;
+                    
+                    conversationId = newConversation.id;
+                }
+                
+                // إرسال الرسالة
+                const { error } = await supabase
+                    .from('messages')
+                    .insert([
+                        { 
+                            conversation_id: conversationId, 
+                            user_id: currentUser.id, 
+                            content: content 
+                        }
+                    ]);
+                
+                if (error) throw error;
+                
+                // إضافة الرسالة إلى الواجهة
+                const messagesContainer = document.getElementById('admin-chat-messages');
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = 'chat-message self';
+                messageElement.innerHTML = `
+                    <div class="chat-message-sender">أنت</div>
+                    <div class="chat-message-content">${content}</div>
+                    <div class="chat-message-time">${formatTime(new Date())}</div>
+                `;
+                
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // مسح حقل الإدخال
+                input.value = '';
+                
+            } catch (error) {
+                console.error('خطأ في إرسال الرسالة:', error.message);
+                alert('حدث خطأ في إرسال الرسالة: ' + error.message);
+            }
         }
 
         // معاينة صورة غلاف المانهوا
@@ -3236,11 +3565,50 @@
 
         // حذف المانهوا
         async function deleteManhwa(manhwaId) {
-            if (!confirm('هل أنت متأكد من حذف هذه المانهوا؟ لا يمكن التراجع عن هذا الإجراء.')) {
+            if (!confirm('هل أنت متأكد من حذف هذه المانهوا؟ سيتم حذف جميع الفصول والتعليقات المرتبطة بها.')) {
                 return;
             }
             
             try {
+                // الحصول على معلومات المانهوا لحذف الصورة
+                const { data: manhwa, error: fetchError } = await supabase
+                    .from('manhwas')
+                    .select('cover_url')
+                    .eq('id', manhwaId)
+                    .single();
+                
+                if (fetchError) throw fetchError;
+                
+                // حذف صورة الغلاف من التخزين إذا كانت موجودة
+                if (manhwa.cover_url && manhwa.cover_url.includes('supabase')) {
+                    const fileName = manhwa.cover_url.split('/').pop();
+                    const { error: deleteCoverError } = await supabase.storage
+                        .from('manhwa-covers')
+                        .remove([fileName]);
+                    
+                    if (deleteCoverError) {
+                        console.error('خطأ في حذف صورة الغلاف:', deleteCoverError.message);
+                    }
+                }
+                
+                // حذف الفصول المرتبطة (سيحذف CASCADE التعليقات والإعجابات والتبليغات)
+                const { data: chapters, error: chaptersError } = await supabase
+                    .from('chapters')
+                    .select('id, pages')
+                    .eq('manhwa_id', manhwaId);
+                
+                if (chaptersError) throw chaptersError;
+                
+                // حذف صفحات الفصول من التخزين
+                if (chapters && chapters.length > 0) {
+                    for (const chapter of chapters) {
+                        if (chapter.pages && chapter.pages.length > 0) {
+                            await deleteChapterPages(chapter.pages);
+                        }
+                    }
+                }
+                
+                // حذف المانهوا
                 const { error } = await supabase
                     .from('manhwas')
                     .delete()
@@ -3260,19 +3628,75 @@
             }
         }
 
+        // حذف صفحات الفصل من التخزين
+        async function deleteChapterPages(pages) {
+            try {
+                if (!pages || pages.length === 0) return;
+                
+                const fileNames = pages.map(pageUrl => {
+                    if (pageUrl.includes('supabase')) {
+                        return pageUrl.split('/').pop();
+                    }
+                    return null;
+                }).filter(name => name !== null);
+                
+                if (fileNames.length > 0) {
+                    const { error } = await supabase.storage
+                        .from('chapter-pages')
+                        .remove(fileNames);
+                    
+                    if (error) throw error;
+                }
+            } catch (error) {
+                console.error('خطأ في حذف صفحات الفصل:', error.message);
+            }
+        }
+
         // حذف الفصل
         async function deleteChapter(chapterId) {
-            if (!confirm('هل أنت متأكد من حذف هذا الفصل؟ لا يمكن التراجع عن هذا الإجراء.')) {
+            if (!confirm('هل أنت متأكد من حذف هذا الفصل؟ سيتم حذف جميع الصفحات المرتبطة به.')) {
                 return;
             }
             
             try {
+                // الحصول على معلومات الفصل لحذف الصفحات
+                const { data: chapter, error: fetchError } = await supabase
+                    .from('chapters')
+                    .select('pages, manhwa_id')
+                    .eq('id', chapterId)
+                    .single();
+                
+                if (fetchError) throw fetchError;
+                
+                // حذف صفحات الفصل من التخزين
+                if (chapter.pages && chapter.pages.length > 0) {
+                    await deleteChapterPages(chapter.pages);
+                }
+                
+                // حذف الفصل
                 const { error } = await supabase
                     .from('chapters')
                     .delete()
                     .eq('id', chapterId);
                 
                 if (error) throw error;
+                
+                // تحديث عدد الفصول في المانهوا
+                const { data: chaptersCount, error: countError } = await supabase
+                    .from('chapters')
+                    .select('chapter_number')
+                    .eq('manhwa_id', chapter.manhwa_id)
+                    .order('chapter_number', { ascending: false })
+                    .limit(1);
+                
+                if (!countError && chaptersCount && chaptersCount.length > 0) {
+                    const latestChapter = chaptersCount[0].chapter_number;
+                    
+                    await supabase
+                        .from('manhwas')
+                        .update({ latest_chapter: latestChapter })
+                        .eq('id', chapter.manhwa_id);
+                }
                 
                 alert('تم حذف الفصل بنجاح');
                 
@@ -3464,13 +3888,21 @@
             alert('سيتم عرض المساعدة في التطبيق الكامل');
         }
 
-        // وظائف التعليقات
-        function likeComment(commentId) {
-            alert(`سيتم الإعجاب بالتعليق ${commentId} في التطبيق الكامل`);
+        // وظائف إضافية للإدارة
+        function viewUserProfile(userId) {
+            alert(`سيتم عرض ملف المستخدم ${userId} في التطبيق الكامل`);
         }
 
-        function reportComment(commentId) {
-            alert(`سيتم التبليغ عن التعليق ${commentId} في التطبيق الكامل`);
+        function toggleUserStatus(userId) {
+            alert(`سيتم تغيير حالة المستخدم ${userId} في التطبيق الكامل`);
+        }
+
+        function viewReportDetails(reportId) {
+            alert(`سيتم عرض تفاصيل التبليغ ${reportId} في التطبيق الكامل`);
+        }
+
+        function resolveReport(reportId) {
+            alert(`سيتم معالجة التبليغ ${reportId} في التطبيق الكامل`);
         }
 
         // وظائف البروفايل
