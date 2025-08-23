@@ -1,9 +1,9 @@
 /* ==========================================================
    ZKD WebApp - App Logic (كامل)
-   إصلاحات وتحسينات شاملة
+   إصلاحات شاملة مع دعم الهيكل الجديد
    ========================================================== */
 
-// 1) تهيئة Supabase
+/* 1) تهيئة Supabase */
 const SB_URL = 'https://ekiaasbrzkbckmtyptxw.supabase.co';
 const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVraWFhc2JyemtiY2ttdHlwdHh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4ODk0OTEsImV4cCI6MjA3MTQ2NTQ5MX0.4IAlkSVs_ILeSWf2NpvJJSYat3NzkMT-WieYyM9BPUA';
 
@@ -15,7 +15,7 @@ if (!window.supabase || !window.supabase.createClient) {
 // إنشاء العميل
 const sb = window.supabase.createClient(SB_URL, SB_ANON_KEY);
 
-// 2) DOM & State
+/* 2) DOM & State */
 const splashScreen = document.querySelector('.splash-screen');
 const views = document.querySelectorAll('.view');
 const bottomNav = document.querySelector('.bottom-nav');
@@ -31,6 +31,7 @@ const allMangaGrid = document.getElementById('allMangaGrid');
 const savedMangaGrid = document.getElementById('savedManga');
 const continueReadingGrid = document.getElementById('continueReading');
 const readingHistoryGrid = document.getElementById('readingHistory');
+const searchResults = document.getElementById('searchResults');
 
 // عناصر البروفايل
 const profileAvatar = document.getElementById('profileAvatar');
@@ -71,6 +72,13 @@ const addMangaBtn = document.getElementById('addMangaBtn');
 const addChapterBtn = document.getElementById('addChapterBtn');
 const manageUsersBtn = document.getElementById('manageUsersBtn');
 const manageTeamsBtn = document.getElementById('manageTeamsBtn');
+
+// عناصر البحث
+const searchInput = document.getElementById('searchInput');
+const searchBtnMain = document.getElementById('searchBtnMain');
+const filterStatus = document.getElementById('filterStatus');
+const filterType = document.getElementById('filterType');
+const filterGenre = document.getElementById('filterGenre');
 
 // النمط العام
 const root = document.documentElement;
@@ -129,6 +137,11 @@ function formatDate(d) {
   }
 }
 
+function formatRating(rating) {
+  if (!rating) return '';
+  return '⭐'.repeat(Math.round(rating)) + ` (${rating})`;
+}
+
 // 4) إدارة العرض والتنقل
 function switchView(view) {
   currentView = view;
@@ -145,6 +158,10 @@ function switchView(view) {
   }
   if (view === 'account') loadProfileStats();
   if (view === 'admin-panel' && isAdmin) loadAdminDashboard();
+  if (view === 'search') {
+    searchInput.value = '';
+    searchResults.innerHTML = '';
+  }
   
   // إغلاق القائمة الجانبية
   hideSidebar();
@@ -180,7 +197,7 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
   });
 });
 
-document.querySelectorAll('#menuToggle, #menuToggleCategories, #menuToggleMangaList, #menuToggleLibrary, #menuToggleAccount, #menuToggleSettings, #menuToggleAdmin').forEach(btn => {
+document.querySelectorAll('#menuToggle, #menuToggleCategories, #menuToggleMangaList, #menuToggleLibrary, #menuToggleAccount, #menuToggleSettings, #menuToggleAdmin, #menuToggleSearch').forEach(btn => {
   btn.addEventListener('click', toggleSidebar);
 });
 
@@ -357,7 +374,7 @@ async function loadLatestChapters() {
         cover_url,
         number,
         chapter_number,
-        manga:manga_id(id, title, cover_url, status, type, genre)
+        manga:manga_id(id, title, cover_url, status, type, genres, rating)
       `)
       .order('created_at', { ascending: false })
       .limit(20);
@@ -374,7 +391,7 @@ async function loadAllManga() {
   showLoading(allMangaGrid);
   try {
     const { data, error } = await sb.from('manga')
-      .select('id, title, cover_url, status, type, genre, created_at')
+      .select('id, title, cover_url, status, type, genres, rating, created_at')
       .order('created_at', { ascending: false })
       .limit(50);
       
@@ -421,8 +438,8 @@ async function filterByGenre(genre) {
   
   try {
     const { data, error } = await sb.from('manga')
-      .select('id, title, cover_url, status, type, genre, created_at')
-      .ilike('genre', `%${genre}%`)
+      .select('id, title, cover_url, status, type, genres, rating, created_at')
+      .contains('genres', [genre])
       .order('created_at', { ascending: false })
       .limit(30);
       
@@ -527,7 +544,7 @@ async function renderSavedManga() {
   
   try {
     const { data, error } = await sb.from('manga')
-      .select('id, title, cover_url, status, type, genre, created_at')
+      .select('id, title, cover_url, status, type, genres, rating, created_at')
       .in('id', saved);
       
     if (error) throw error;
@@ -659,13 +676,15 @@ function renderMangaGrid(target, list) {
     
     const cover = manga.cover_url || 'https://via.placeholder.com/300x420/1a1a1a/4361ee?text=No+Image';
     const title = manga.title || '—';
-    const meta = manga.genre || manga.type || manga.status || '';
+    const meta = manga.genres?.join(', ') || manga.type || manga.status || '';
+    const rating = manga.rating ? formatRating(manga.rating) : '';
     
     card.innerHTML = `
       <img src="${cover}" alt="${title}" class="manga-cover">
       <div class="manga-info">
         <h3 class="manga-title" title="${title}">${title}</h3>
         <p class="manga-meta">${truncate(meta, 50)}</p>
+        ${rating ? `<div class="manga-rating">${rating}</div>` : ''}
         <div style="display:flex;gap:.4rem;margin-top:.4rem">
           <button class="btn-secondary" data-action="save" title="حفظ"><i class="ri-bookmark-line"></i></button>
           <button class="btn-primary" data-action="open" title="عرض"><i class="ri-eye-line"></i></button>
@@ -1051,7 +1070,46 @@ async function loadProfileStats() {
   }
 }
 
-// 16) تهيئة التطبيق
+// 16) نظام البحث
+async function handleSearch() {
+  const q = (searchInput.value || '').trim();
+  const st = filterStatus.value;
+  const tp = filterType.value;
+  const gn = filterGenre.value;
+  
+  if (!q && !st && !tp && !gn) {
+    showNotification('اكتب كلمة بحث أو اختر فلتر.', 'info');
+    return;
+  }
+  
+  switchView('search');
+  showLoading(searchResults);
+  
+  try {
+    let query = sb.from('manga').select('id, title, cover_url, status, type, genres, rating, created_at');
+    
+    if (q) query = query.ilike('title', `%${q}%`);
+    if (st) query = query.eq('status', st);
+    if (tp) query = query.eq('type', tp);
+    if (gn) query = query.contains('genres', [gn]);
+    
+    query = query.order('created_at', { ascending: false }).limit(60);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    if (!data?.length) {
+      showNoData(searchResults, 'لا توجد نتائج مطابقة');
+    } else {
+      renderMangaGrid(searchResults, data);
+    }
+  } catch (err) {
+    console.error('Error searching:', err);
+    showError(searchResults, 'حدث خطأ في البحث');
+  }
+}
+
+// 17) تهيئة التطبيق
 document.addEventListener('DOMContentLoaded', async () => {
   // إخفاء شاشة التحميل بعد ثانية
   setTimeout(() => {
@@ -1076,6 +1134,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCategories();
   
   // إضافة مستمعي الأحداث للنماذج
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  
   if (loginForm) loginForm.addEventListener('submit', handleLogin);
   if (registerForm) registerForm.addEventListener('submit', handleRegister);
   
@@ -1128,5 +1189,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       this.classList.add('active');
       document.querySelector(`.tab-content[data-content="${this.dataset.tab}"]`).classList.add('active');
     });
+  });
+  
+  // إضافة مستمعي الأحداث للزر العلوي
+  document.getElementById('profileBtn')?.addEventListener('click', () => switchView('account'));
+  document.getElementById('notificationsBtn')?.addEventListener('click', () => {
+    showNotification('مركز الإشعارات قادم قريبًا.', 'info');
+  });
+  
+  // إضافة مستمعي الأحداث للزر العلوي
+  const showRegisterBtn = document.getElementById('showRegister');
+  const showLoginBtn = document.getElementById('showLogin');
+  
+  if (showRegisterBtn) showRegisterBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideModal(loginModal);
+    showModal(registerModal);
+  });
+  
+  if (showLoginBtn) showLoginBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    hideModal(registerModal);
+    showModal(loginModal);
   });
 });
