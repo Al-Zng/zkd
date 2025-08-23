@@ -1,3125 +1,349 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZKD - قارئ المانهوا</title>
-    <meta name="theme-color" content="#000000">
-    <meta name="description" content="تطبيق قراءة المانهوا باللغة العربية - تجربة قراءة سلسة مثل تطبيق جوال">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --primary-bg: #000000;
-            --secondary-bg: #0a0a0a;
-            --card-bg: #111111;
-            --accent-color: #ffffff;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --success-color: #00c896;
-            --warning-color: #ffcc00;
-            --error-color: #ff2e4d;
-            --nav-height: 70px;
-            --transition-speed: 0.3s;
-            --border-radius: 16px;
-            --sidebar-width: 280px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Tajawal', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--primary-bg);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            height: 100vh;
-        }
-
-        /* تخطيط التطبيق */
-        .app-container {
-            max-width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* المحتوى الرئيسي */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            padding-bottom: calc(var(--nav-height) + 20px);
-        }
-
-        /* شاشة تسجيل الدخول */
-        .auth-screen {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            background: var(--primary-bg);
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1000;
-        }
-
-        .auth-logo {
-            width: 140px;
-            height: 140px;
-            margin-bottom: 30px;
-            background: #222;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid white;
-        }
-
-        .auth-logo i {
-            font-size: 60px;
-            color: white;
-        }
-
-        .auth-title {
-            font-size: 32px;
-            margin-bottom: 16px;
-            color: var(--accent-color);
-            font-weight: 800;
-        }
-
-        .auth-subtitle {
-            margin-bottom: 20px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            font-size: 18px;
-            max-width: 90%;
-        }
-
-        .auth-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 25px;
-            width: 100%;
-            max-width: 300px;
-        }
-
-        .auth-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px;
-            border-radius: 50px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .auth-btn.google {
-            background: #ffffff;
-            color: #333;
-        }
-
-        .auth-btn.google:hover {
-            box-shadow: 0 5px 15px rgba(255,255,255,0.1);
-            transform: translateY(-3px);
-        }
-
-        .auth-btn.guest {
-            background: rgba(255,255,255,0.05);
-            color: var(--text-primary);
-        }
-
-        .auth-btn.guest:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-3px);
-        }
-
-        /* شريط التنقل السفلي */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: var(--nav-height);
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            color: var(--text-secondary);
-            transition: all var(--transition-speed);
-            position: relative;
-            cursor: pointer;
-        }
-
-        .nav-item.active {
-            color: var(--accent-color);
-        }
-
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            width: 6px;
-            height: 6px;
-            background: var(--accent-color);
-            border-radius: 50%;
-        }
-
-        .nav-item i {
-            font-size: 22px;
-            margin-bottom: 4px;
-        }
-
-        .nav-item span {
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* الصفحة الرئيسية */
-        .home-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            animation: slideDown 0.5s ease;
-        }
-
-        .app-logo {
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--accent-color);
-            cursor: pointer;
-        }
-
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            border: 2px solid white;
-        }
-
-        .user-avatar:hover {
-            transform: scale(1.1);
-        }
-
-        .search-bar {
-            display: flex;
-            align-items: center;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50px;
-            padding: 12px 20px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .search-bar:focus-within {
-            border-color: rgba(255,255,255,0.3);
-        }
-
-        .search-bar input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            padding: 8px;
-            outline: none;
-            font-size: 16px;
-        }
-
-        .search-bar i {
-            color: var(--text-secondary);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding: 10px 0;
-            margin-bottom: 25px;
-            scrollbar-width: none;
-        }
-
-        .tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .tab {
-            padding: 10px 20px;
-            background: var(--card-bg);
-            border-radius: 50px;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .tab.active {
-            background: #222;
-            color: white;
-            border-color: white;
-        }
-
-        .manhwa-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .manhwa-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            cursor: pointer;
-        }
-
-        .manhwa-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border-color: rgba(255,255,255,0.3);
-        }
-
-        .manhwa-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .manhwa-info {
-            padding: 15px;
-        }
-
-        .manhwa-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-        }
-
-        .manhwa-chapter {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .manhwa-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #222;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 700;
-            border: 1px solid white;
-        }
-
-        /* صفحة معلومات المانهوا */
-        .manhwa-detail {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .manhwa-cover {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
-        }
-
-        .manhwa-title-large {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-
-        .manhwa-meta {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .meta-item {
-            background: var(--card-bg);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .manhwa-description {
-            margin-bottom: 20px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-        }
-
-        .manhwa-tags {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .tag {
-            background: var(--card-bg);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .manhwa-actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .action-btn {
-            padding: 10px 15px;
-            border-radius: 8px;
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .action-btn:hover {
-            background: #222;
-        }
-
-        .action-btn-large {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .action-btn-large:hover {
-            background: #222;
-        }
-
-        .action-btn-large.active {
-            background: var(--success-color);
-            color: black;
-        }
-
-        .chapters-list {
-            margin-top: 20px;
-        }
-
-        .chapter-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            margin-bottom: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .chapter-item:hover {
-            transform: translateX(-5px);
-            border-color: rgba(255,255,255,0.3);
-        }
-
-        .chapter-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chapter-status {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-
-        .chapter-status.read {
-            background: var(--success-color);
-            color: black;
-        }
-
-        .chapter-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* صفحة البروفايل */
-        .profile-page {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .profile-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            border: 3px solid white;
-            position: relative;
-        }
-
-        .profile-avatar-edit {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: #333;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: 2px solid white;
-        }
-
-        .profile-name {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 5px;
-            text-align: center;
-        }
-
-        .profile-email {
-            color: var(--text-secondary);
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .profile-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 30px;
-            width: 100%;
-        }
-
-        .stat-item {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .profile-lists {
-            width: 100%;
-        }
-
-        .profile-list-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .profile-list-title span {
-            color: var(--text-secondary);
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .profile-list {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .profile-list-item {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-        }
-
-        .profile-list-item img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-
-        .profile-list-item-info {
-            padding: 10px;
-        }
-
-        .profile-list-item-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 5px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .profile-list-item-chapter {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* صفحة الإعدادات */
-        .settings-page {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .settings-title {
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            color: var(--accent-color);
-        }
-
-        .settings-group {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .settings-group-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .settings-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .settings-item:last-child {
-            border-bottom: none;
-        }
-
-        .settings-item label {
-            font-weight: 600;
-        }
-
-        .settings-item-content {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .settings-item input[type="text"],
-        .settings-item input[type="email"] {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 10px;
-            color: var(--text-primary);
-            width: 200px;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #333;
-            transition: .4s;
-            border-radius: 24px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--success-color);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        /* لوحة الإدارة */
-        .admin-panel {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .admin-title {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--accent-color);
-        }
-
-        .admin-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-
-        .admin-tab {
-            padding: 10px 20px;
-            background: var(--card-bg);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
-            white-space: nowrap;
-        }
-
-        .admin-tab.active {
-            background: #222;
-            border-color: white;
-        }
-
-        .admin-content {
-            display: none;
-        }
-
-        .admin-content.active {
-            display: block;
-        }
-
-        .admin-actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .admin-action {
-            background: var(--card-bg);
-            padding: 25px 20px;
-            border-radius: var(--border-radius);
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-        }
-
-        .admin-action:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border-color: rgba(255,255,255,0.3);
-        }
-
-        .admin-action i {
-            font-size: 32px;
-            margin-bottom: 15px;
-            color: var(--accent-color);
-        }
-
-        .admin-action p {
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
-            color: var(--text-primary);
-        }
-
-        .file-upload {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .file-upload-input {
-            opacity: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        .file-upload-label {
-            display: block;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px dashed rgba(255,255,255,0.3);
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .file-upload-label:hover {
-            border-color: rgba(255,255,255,0.5);
-        }
-
-        .admin-form {
-            margin-top: 30px;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .admin-list {
-            margin-top: 20px;
-        }
-
-        .admin-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            margin-bottom: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .admin-list-item-info {
-            flex: 1;
-        }
-
-        .admin-list-item-title {
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .admin-list-item-meta {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .admin-list-item-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* محادثة الإداريين */
-        .admin-chat {
-            margin-top: 30px;
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            border: 1px solid rgba(255,255,255,0.1);
-            overflow: hidden;
-            height: 500px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-weight: 700;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .chat-message {
-            max-width: 80%;
-            padding: 12px 15px;
-            border-radius: 18px;
-            position: relative;
-        }
-
-        .chat-message.self {
-            align-self: flex-end;
-            background: var(--success-color);
-            color: black;
-        }
-
-        .chat-message.other {
-            align-self: flex-start;
-            background: #222;
-        }
-
-        .chat-message-sender {
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .chat-message-content {
-            margin-bottom: 5px;
-        }
-
-        .chat-message-image {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 5px;
-        }
-
-        .chat-message-time {
-            font-size: 11px;
-            opacity: 0.7;
-            text-align: right;
-        }
-
-        .chat-input {
-            display: flex;
-            padding: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            gap: 10px;
-        }
-
-        .chat-input input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
-            color: var(--text-primary);
-        }
-
-        .chat-input button {
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: none;
-            background: var(--success-color);
-            color: black;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        /* قارئ المانهوا */
-        .reader-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #000;
-            z-index: 2000;
-            display: none;
-            flex-direction: column;
-        }
-
-        .reader-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            transition: opacity var(--transition-speed);
-        }
-
-        .reader-content {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-        }
-
-        .reader-page {
-            max-width: 100%;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .reader-page img {
-            width: 100%;
-            display: block;
-        }
-
-        .reader-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 10;
-            transition: opacity var(--transition-speed);
-        }
-
-        .reader-next-chapter {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--success-color);
-            color: black;
-            padding: 15px 25px;
-            border-radius: 50px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            z-index: 15;
-            display: none;
-        }
-
-        /* التعليقات */
-        .comments-section {
-            margin-top: 30px;
-        }
-
-        .comments-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .comment-form {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .comment-form input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
-            color: var(--text-primary);
-        }
-
-        .comment-form button {
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: none;
-            background: var(--success-color);
-            color: black;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .comments-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .comment-item {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .comment-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .comment-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .comment-author {
-            font-weight: 700;
-        }
-
-        .comment-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-left: auto;
-        }
-
-        .comment-content {
-            margin-bottom: 10px;
-        }
-
-        .comment-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .comment-action {
-            font-size: 14px;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        /* القائمة الجانبية */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: -280px;
-            width: var(--sidebar-width);
-            height: 100%;
-            background: var(--secondary-bg);
-            z-index: 1500;
-            transition: right 0.3s ease;
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
-        }
-
-        .sidebar.open {
-            right: 0;
-        }
-
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .sidebar-title {
-            font-size: 20px;
-            font-weight: 800;
-        }
-
-        .sidebar-close {
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .sidebar-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-item:hover {
-            background: var(--card-bg);
-        }
-
-        .sidebar-item i {
-            font-size: 20px;
-            width: 24px;
-            text-align: center;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1400;
-            display: none;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        /* تأثيرات والأنيميشن */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /* تحسينات للشاشات الكبيرة */
-        @media (min-width: 768px) {
-            .manhwa-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .profile-list {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .manhwa-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .profile-list {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>zkd - منصة المانغا والمانهوا</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://ekiaasbrzkbckmtyptxw.supabase.co" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
-        <!-- شاشة تسجيل الدخول -->
-        <div class="auth-screen" id="auth-screen">
-            <div class="auth-logo">
-                <i class="fas fa-book-open"></i>
-            </div>
-            <h1 class="auth-title">ZKD - قارئ المانهوا</h1>
-            <p class="auth-subtitle">سجل الدخول للوصول إلى مكتبة المانهوا الكاملة</p>
-            
-            <div class="auth-buttons">
-                <div class="auth-btn google" onclick="signInWithGoogle()">
-                    <i class="fab fa-google"></i>
-                    <span>التسجيل بحساب Google</span>
-                </div>
-                <div class="auth-btn guest" onclick="signInAsGuest()">
-                    <i class="fas fa-user"></i>
-                    <span>الدخول كزائر</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content">
-            <!-- الصفحة الرئيسية -->
-            <div id="home-page" style="display: none;">
-                <div class="home-header">
-                    <div class="app-logo" onclick="showSection('home')">ZKD</div>
-                    <div class="user-avatar" onclick="showProfile()" id="user-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                </div>
-
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="ابحث عن مانهوا أو فصل..." onkeyup="searchManhwa(this.value)">
-                </div>
-
-                <div class="tabs">
-                    <div class="tab active" onclick="changeTab(this, 'all')">الكل</div>
-                    <div class="tab" onclick="changeTab(this, 'popular')">الأكثر شهرة</div>
-                    <div class="tab" onclick="changeTab(this, 'latest')">الأحدث</div>
-                    <div class="tab" onclick="changeTab(this, 'action')">أكشن</div>
-                    <div class="tab" onclick="changeTab(this, 'romance')">رومانسي</div>
-                </div>
-
-                <div class="manhwa-grid" id="manhwa-container">
-                    <!-- سيتم ملؤها بالبيانات من Supabase -->
-                </div>
-            </div>
-
-            <!-- صفحة معلومات المانهوا -->
-            <div class="manhwa-detail" id="manhwa-detail">
-                <button class="action-btn" onclick="goBack()" style="margin-bottom: 20px;">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
-                
-                <img id="detail-cover" class="manhwa-cover" src="" alt="Manhwa Cover">
-                <h1 id="detail-title" class="manhwa-title-large"></h1>
-                
-                <div class="manhwa-meta">
-                    <span class="meta-item" id="detail-status"></span>
-                    <span class="meta-item" id="detail-chapters"></span>
-                    <span class="meta-item" id="detail-views"></span>
-                </div>
-                
-                <p id="detail-description" class="manhwa-description"></p>
-                
-                <div class="manhwa-tags" id="detail-tags"></div>
-                
-                <div class="manhwa-actions">
-                    <button class="action-btn-large" id="watch-later-btn" onclick="toggleWatchLater()">
-                        <i class="far fa-bookmark"></i> أشاهدها لاحقاً
-                    </button>
-                    <button class="action-btn-large" id="watching-btn" onclick="toggleWatching()">
-                        <i class="far fa-eye"></i> أشاهدها الآن
-                    </button>
-                </div>
-                
-                <h3>الفصول</h3>
-                <div class="chapters-list" id="chapters-list">
-                    <!-- سيتم ملؤها بالفصول -->
-                </div>
-
-                <div class="comments-section">
-                    <h3 class="comments-title">التعليقات</h3>
-                    <div class="comment-form">
-                        <input type="text" placeholder="اكتب تعليقك هنا..." id="comment-input">
-                        <button onclick="addComment()">إرسال</button>
-                    </div>
-                    <div class="comments-list" id="comments-container">
-                        <!-- سيتم ملؤها بالتعليقات -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- صفحة البروفايل -->
-            <div class="profile-page" id="profile-page">
-                <button class="action-btn" onclick="goBack()" style="margin-bottom: 20px;">
-                    <i class="fas fa-arrow-right"></i> رجوع
-                </button>
-                
-                <div class="profile-header">
-                    <div class="profile-avatar" id="profile-avatar">
-                        <span id="profile-avatar-text">US</span>
-                        <div class="profile-avatar-edit" onclick="changeAvatar()">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                    </div>
-                    <h2 class="profile-name" id="profile-name">مستخدم</h2>
-                    <p class="profile-email" id="profile-email">user@example.com</p>
-                </div>
-                
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat-watching">0</div>
-                        <div class="stat-label">أشاهدها</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat-watch-later">0</div>
-                        <div class="stat-label">المحفوظة</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="stat-completed">0</div>
-                        <div class="stat-label">المكتملة</div>
-                    </div>
-                </div>
-                
-                <div class="profile-lists">
-                    <div class="profile-list-title">
-                        <span>أشاهدها الآن</span>
-                        <span onclick="showAllWatching()">عرض الكل</span>
-                    </div>
-                    <div class="profile-list" id="watching-list">
-                        <!-- سيتم ملؤها بالمانهوا التي يشاهدها المستخدم -->
-                    </div>
-                    
-                    <div class="profile-list-title">
-                        <span>سأشاهدها لاحقاً</span>
-                        <span onclick="showAllWatchLater()">عرض الكل</span>
-                    </div>
-                    <div class="profile-list" id="watch-later-list">
-                        <!-- سيتم ملؤها بالمانهوا المحفوظة -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- صفحة الإعدادات -->
-            <div class="settings-page" id="settings-page">
-                <h2 class="settings-title">الإعدادات</h2>
-                
-                <div class="settings-group">
-                    <h3 class="settings-group-title">الحساب</h3>
-                    <div class="settings-item">
-                        <label>الاسم</label>
-                        <div class="settings-item-content">
-                            <input type="text" id="settings-name" placeholder="اسمك">
-                            <button class="action-btn" onclick="updateProfile()">حفظ</button>
-                        </div>
-                    </div>
-                    <div class="settings-item">
-                        <label>البريد الإلكتروني</label>
-                        <span id="settings-email">user@example.com</span>
-                    </div>
-                    <div class="settings-item">
-                        <label>طريقة التسجيل</label>
-                        <span id="settings-login-method">زائر</span>
-                    </div>
-                </div>
-                
-                <div class="settings-group">
-                    <h3 class="settings-group-title">إعدادات القراءة</h3>
-                    <div class="settings-item">
-                        <label>وضع القراءة من الأعلى إلى الأسفل</label>
-                        <label class="switch">
-                            <input type="checkbox" id="vertical-reading" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="settings-item">
-                        <label>التنزيل التلقائي للفصول</label>
-                        <label class="switch">
-                            <input type="checkbox" id="auto-download">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="settings-item">
-                        <label>الإشعارات عن الفصول الجديدة</label>
-                        <label class="switch">
-                            <input type="checkbox" id="notifications" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="settings-group">
-                    <h3 class="settings-group-title">المظهر</h3>
-                    <div class="settings-item">
-                        <label>الوضع الليلي</label>
-                        <label class="switch">
-                            <input type="checkbox" id="dark-mode" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="settings-item">
-                        <label>حجم الخط</label>
-                        <select id="font-size">
-                            <option value="small">صغير</option>
-                            <option value="medium" selected>متوسط</option>
-                            <option value="large">كبير</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="settings-group">
-                    <h3 class="settings-group-title">عام</h3>
-                    <div class="settings-item">
-                        <label>إصدار التطبيق</label>
-                        <span>1.0.0</span>
-                    </div>
-                    <div class="settings-item">
-                        <button class="action-btn" onclick="clearCache()" style="width: 100%;">
-                            <i class="fas fa-trash"></i> مسح الذاكرة المؤقتة
-                        </button>
-                    </div>
-                    <div class="settings-item">
-                        <button class="action-btn" onclick="signOut()" style="width: 100%;">
-                            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- لوحة الإدارة -->
-            <div class="admin-panel" id="admin-panel">
-                <div class="admin-header">
-                    <div class="admin-title">لوحة التحكم</div>
-                    <div class="user-avatar" onclick="toggleAdmin()">
-                        <i class="fas fa-times"></i>
-                    </div>
-                </div>
-                
-                <div class="admin-tabs">
-                    <div class="admin-tab active" onclick="changeAdminTab(this, 'dashboard')">
-                        <i class="fas fa-tachometer-alt"></i> لوحة التحكم
-                    </div>
-                    <div class="admin-tab" onclick="changeAdminTab(this, 'manhwas')">
-                        <i class="fas fa-book"></i> إدارة المانهوا
-                    </div>
-                    <div class="admin-tab" onclick="changeAdminTab(this, 'chapters')">
-                        <i class="fas fa-file"></i> إدارة الفصول
-                    </div>
-                    <div class="admin-tab" onclick="changeAdminTab(this, 'users')">
-                        <i class="fas fa-users"></i> إدارة المستخدمين
-                    </div>
-                    <div class="admin-tab" onclick="changeAdminTab(this, 'reports')">
-                        <i class="fas fa-flag"></i> التبليغات
-                    </div>
-                    <div class="admin-tab" onclick="changeAdminTab(this, 'chat')">
-                        <i class="fas fa-comments"></i> محادثة الإداريين
-                    </div>
-                </div>
-                
-                <!-- لوحة التحكم -->
-                <div class="admin-content active" id="admin-dashboard">
-                    <p>إحصائيات وأداء التطبيق</p>
-                    
-                    <div class="admin-actions">
-                        <div class="admin-action" onclick="showAddManhwaForm()">
-                            <i class="fas fa-plus"></i>
-                            <p>إضافة مانهوا</p>
-                        </div>
-                        <div class="admin-action" onclick="showAddChapterForm()">
-                            <i class="fas fa-edit"></i>
-                            <p>إضافة فصل</p>
-                        </div>
-                        <div class="admin-action" onclick="changeAdminTab(null, 'users')">
-                            <i class="fas fa-users"></i>
-                            <p>إدارة المستخدمين</p>
-                        </div>
-                        <div class="admin-action" onclick="showStats()">
-                            <i class="fas fa-chart-line"></i>
-                            <p>الإحصائيات</p>
-                        </div>
-                    </div>
-                    
-                    <div class="admin-form">
-                        <h3>إحصائيات سريعة</h3>
-                        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                            <div class="stat-item">
-                                <div class="stat-value" id="admin-total-manhwas">0</div>
-                                <div class="stat-label">عدد المانهوا</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="admin-total-chapters">0</div>
-                                <div class="stat-label">عدد الفصول</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="admin-total-users">0</div>
-                                <div class="stat-label">عدد المستخدمين</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="admin-total-views">0</div>
-                                <div class="stat-label">عدد المشاهدات</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- إدارة المانهوا -->
-                <div class="admin-content" id="admin-manhwas">
-                    <div class="admin-form">
-                        <h3>إضافة مانهوا جديدة</h3>
-                        <form onsubmit="event.preventDefault(); addNewManhwa(this);">
-                            <div class="form-group">
-                                <label>اسم المانهوا</label>
-                                <input type="text" name="title" required>
-                            </div>
-                            <div class="form-group">
-                                <label>وصف المانهوا</label>
-                                <textarea name="description" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>صورة الغلاف</label>
-                                <div class="file-upload">
-                                    <input type="file" class="file-upload-input" id="manhwa-cover-upload" accept="image/*" onchange="previewManhwaCover(this)">
-                                    <label class="file-upload-label" for="manhwa-cover-upload">
-                                        <i class="fas fa-upload"></i> اختر صورة
-                                    </label>
-                                </div>
-                                <div id="cover-preview" style="margin-top: 10px; display: none;">
-                                    <img id="preview-image" src="#" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>التصنيفات (مفصولة بفواصل)</label>
-                                <input type="text" name="tags" placeholder="أكشن, رومانسي, خيال">
-                            </div>
-                            <div class="form-group">
-                                <label>الحالة</label>
-                                <select name="status">
-                                    <option value="ongoing">مستمرة</option>
-                                    <option value="completed">مكتملة</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="action-btn" style="width: 100%;">إضافة المانهوا</button>
-                        </form>
-                    </div>
-                    
-                    <div class="admin-list" id="admin-manhwas-list">
-                        <!-- سيتم ملؤها بقائمة المانهوا -->
-                    </div>
-                </div>
-                
-                <!-- إدارة الفصول -->
-                <div class="admin-content" id="admin-chapters">
-                    <div class="admin-form">
-                        <h3>إضافة فصل جديد</h3>
-                        <form onsubmit="event.preventDefault(); addNewChapter(this);">
-                            <div class="form-group">
-                                <label>المانهوا</label>
-                                <select id="chapter-manhwa-select" required>
-                                    <option value="">اختر المانهوا</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>رقم الفصل</label>
-                                <input type="number" name="chapter_number" required>
-                            </div>
-                            <div class="form-group">
-                                <label>عنوان الفصل (اختياري)</label>
-                                <input type="text" name="title">
-                            </div>
-                            <div class="form-group">
-                                <label>صفحات الفصل</label>
-                                <div class="file-upload">
-                                    <input type="file" class="file-upload-input" id="chapter-pages-upload" accept="image/*" multiple onchange="previewChapterPages(this)">
-                                    <label class="file-upload-label" for="chapter-pages-upload">
-                                        <i class="fas fa-upload"></i> اختر الصفحات
-                                    </label>
-                                </div>
-                                <div id="pages-preview" style="margin-top: 10px; display: none;">
-                                    <div id="pages-preview-list" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
-                                </div>
-                            </div>
-                            <button type="submit" class="action-btn" style="width: 100%;">إضافة الفصل</button>
-                        </form>
-                    </div>
-                    
-                    <div class="admin-list" id="admin-chapters-list">
-                        <!-- سيتم ملؤها بقائمة الفصول -->
-                    </div>
-                </div>
-                
-                <!-- إدارة المستخدمين -->
-                <div class="admin-content" id="admin-users">
-                    <div class="admin-list" id="admin-users-list">
-                        <!-- سيتم ملؤها بقائمة المستخدمين -->
-                    </div>
-                </div>
-                
-                <!-- التبليغات -->
-                <div class="admin-content" id="admin-reports">
-                    <div class="admin-list" id="admin-reports-list">
-                        <!-- سيتم ملؤها بقائمة التبليغات -->
-                    </div>
-                </div>
-                
-                <!-- محادثة الإداريين -->
-                <div class="admin-content" id="admin-chat">
-                    <div class="admin-chat">
-                        <div class="chat-header">محادثة الإداريين</div>
-                        <div class="chat-messages" id="admin-chat-messages">
-                            <!-- سيتم ملؤها بالرسائل -->
-                        </div>
-                        <div class="chat-input">
-                            <input type="text" placeholder="اكتب رسالة..." id="admin-chat-input">
-                            <button onclick="sendAdminMessage()">إرسال</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- شريط التنقل السفلي -->
-        <div class="bottom-nav">
-            <div class="nav-item active" onclick="showSection('home')">
-                <i class="fas fa-home"></i>
-                <span>الرئيسية</span>
-            </div>
-            <div class="nav-item" onclick="showSection('search')">
-                <i class="fas fa-search"></i>
-                <span>بحث</span>
-            </div>
-            <div class="nav-item" onclick="showBookmarks()">
-                <i class="fas fa-bookmark"></i>
-                <span>المحفوظات</span>
-            </div>
-            <div class="nav-item" onclick="showSection('settings')">
-                <i class="fas fa-cog"></i>
-                <span>الإعدادات</span>
-            </div>
-            <div class="nav-item" onclick="toggleSidebar()">
-                <i class="fas fa-bars"></i>
-                <span>القائمة</span>
-            </div>
-        </div>
-
-        <!-- قارئ المانهوا -->
-        <div class="reader-container" id="reader">
-            <div class="reader-header">
-                <i class="fas fa-arrow-right" onclick="closeReader()"></i>
-                <div id="reader-title">الفصل 1 - الصفحة 1</div>
-                <i class="fas fa-ellipsis-v" onclick="showReaderOptions()"></i>
-            </div>
-            
-            <div class="reader-content" id="reader-content">
-                <!-- سيتم ملؤها بالصفحات -->
-            </div>
-            
-            <div class="reader-controls">
-                <i class="fas fa-cog" onclick="showReaderSettings()"></i>
-                <div>
-                    <i class="fas fa-chevron-right" onclick="nextPage()"></i>
-                    <i class="fas fa-chevron-left" onclick="prevPage()"></i>
-                </div>
-                <i class="fas fa-download" onclick="downloadChapter()"></i>
-            </div>
-            
-            <div class="reader-next-chapter" id="reader-next-chapter" onclick="loadNextChapter()">
-                الفصل التالي <i class="fas fa-arrow-left"></i>
-            </div>
-        </div>
-
-        <!-- القائمة الجانبية -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">القائمة</div>
-                <div class="sidebar-close" onclick="closeSidebar()">
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-            
-            <div class="sidebar-menu">
-                <div class="sidebar-item" onclick="showSection('home')">
-                    <i class="fas fa-home"></i>
-                    <span>الرئيسية</span>
-                </div>
-                <div class="sidebar-item" onclick="showProfile()">
-                    <i class="fas fa-user"></i>
-                    <span>الملف الشخصي</span>
-                </div>
-                <div class="sidebar-item" onclick="showSection('settings')">
-                    <i class="fas fa-cog"></i>
-                    <span>الإعدادات</span>
-                </div>
-                <div class="sidebar-item" onclick="showBookmarks()">
-                    <i class="fas fa-bookmark"></i>
-                    <span>المحفوظات</span>
-                </div>
-                <div class="sidebar-item" onclick="showHistory()">
-                    <i class="fas fa-history"></i>
-                    <span>السجل</span>
-                </div>
-                <div class="sidebar-item" onclick="showDownloads()">
-                    <i class="fas fa-download"></i>
-                    <span>التحميلات</span>
-                </div>
-                <div class="sidebar-item" onclick="showNotifications()">
-                    <i class="fas fa-bell"></i>
-                    <span>الإشعارات</span>
-                </div>
-                <div class="sidebar-item" onclick="showHelp()">
-                    <i class="fas fa-question-circle"></i>
-                    <span>المساعدة</span>
-                </div>
-                <div class="sidebar-item" onclick="signOut()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>تسجيل الخروج</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Overlay للقائمة الجانبية -->
-        <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <!-- شاشة التحميل -->
+  <div class="splash-screen">
+    <div class="logo">
+      <span>zkd</span>
     </div>
+  </div>
 
-    <script>
-        // تهيئة Supabase
-        const supabaseUrl = 'https://dnhzgduojexngvconytx.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRuaHpnZHVvamV4bmd2Y29ueXR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2NjM1NDYsImV4cCI6MjA3MTIzOTU0Nn0.84PMLVTIc-zbKqiBxG3sl1PSOi0Zqg8gaUAr4Go3Z38';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  <!-- الهيكل الرئيسي -->
+  <div class="app-container">
+    <!-- شريط التنقل العلوي -->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <span>zkd</span>
+      </div>
+      <div class="nav-actions">
+        <button class="btn-icon" data-action="open-search" title="بحث">
+          <i class="ri-search-line"></i>
+        </button>
+        <button class="btn-icon" id="notificationsBtn" title="الإشعارات">
+          <i class="ri-notification-3-line"></i>
+        </button>
+        <button class="btn-icon" id="profileBtn" title="حسابي">
+          <i class="ri-user-line"></i>
+        </button>
+      </div>
+    </nav>
 
-        // حالة التطبيق
-        let currentUser = null;
-        let isAdmin = false;
-        let isGuest = false;
-        let manhwas = [];
-        let currentManhwa = null;
-        let currentChapter = null;
-        let currentPage = 0;
-        let longPressTimer = null;
-        let userLists = {
-            watching: [],
-            watchLater: [],
-            completed: []
-        };
+    <!-- القائمة الجانبية -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>الأقسام</h3>
+        <button class="btn-icon" id="closeSidebar">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="sidebar-item" data-nav="home">
+          <i class="ri-home-5-line"></i>
+          <span>الرئيسية</span>
+        </a>
+        <a href="#" class="sidebar-item" data-nav="categories">
+          <i class="ri-apps-line"></i>
+          <span>التصنيفات</span>
+        </a>
+        <a href="#" class="sidebar-item" data-nav="manga-list">
+          <i class="ri-book-2-line"></i>
+          <span>قائمة المانغا</span>
+        </a>
+        <a href="#" class="sidebar-item" data-nav="library">
+          <i class="ri-bookmark-line"></i>
+          <span>المكتبة</span>
+        </a>
+        <a href="#" class="sidebar-item" data-nav="account">
+          <i class="ri-user-line"></i>
+          <span>الحساب</span>
+        </a>
+        <a href="#" class="sidebar-item" data-nav="settings">
+          <i class="ri-settings-3-line"></i>
+          <span>الإعدادات</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="#" class="sidebar-item" data-nav="admin-panel" id="adminPanelLink" hidden>
+          <i class="ri-admin-line"></i>
+          <span>لوحة التحكم</span>
+        </a>
+      </nav>
+    </aside>
 
-        // قائمة المسموح لهم بالإدارة
-        const adminEmails = [
-            'mohammedznger@gmail.com',
-            'admin@zkd.com'
-        ];
+    <!-- العروض/الصفحات -->
+    <main class="main-content">
+      <!-- الصفحة: الرئيسية -->
+      <section class="view active" data-view="home">
+        <div class="section-header">
+          <h2>آخر الفصول المضافة</h2>
+          <button class="btn-icon" id="menuToggle">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+        <div class="chapters-grid" id="latestChapters"></div>
+      </section>
 
-        // تهيئة التطبيق
-        document.addEventListener('DOMContentLoaded', function() {
-            initApp();
-            checkAuthState();
-        });
+      <!-- الصفحة: التصنيفات -->
+      <section class="view" data-view="categories">
+        <div class="section-header">
+          <h2>التصنيفات</h2>
+          <button class="btn-icon" id="menuToggleCategories">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+        <div class="categories-grid" id="categoriesGrid"></div>
+      </section>
 
-        // تهيئة التطبيق
-        async function initApp() {
-            console.log('جاري تهيئة التطبيق...');
-            
-            // معالجة مصادقة OAuth عند العودة من الصفحة
-            const { data, error } = await supabase.auth.getSession();
-            if (data.session) {
-                handleAuthSuccess(data.session.user);
-            }
-        }
+      <!-- الصفحة: قائمة المانغا -->
+      <section class="view" data-view="manga-list">
+        <div class="section-header">
+          <h2>قائمة المانغا</h2>
+          <button class="btn-icon" id="menuToggleMangaList">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+        <div class="manga-grid" id="allMangaGrid"></div>
+      </section>
 
-        // التحقق من حالة المصادقة
-        async function checkAuthState() {
-            try {
-                // الاستماع لتغيرات حالة المصادقة
-                supabase.auth.onAuthStateChange(async (event, session) => {
-                    if (event === 'SIGNED_IN' && session) {
-                        handleAuthSuccess(session.user);
-                    } else if (event === 'SIGNED_OUT') {
-                        handleSignOut();
-                    } else if (event === 'INITIAL_SESSION') {
-                        // الجلسة الأولية - لا تفعل شيئاً
-                    }
-                });
-            } catch (error) {
-                console.error('خطأ في التحقق من حالة المصادقة:', error.message);
-            }
-        }
+      <!-- الصفحة: المكتبة -->
+      <section class="view" data-view="library">
+        <div class="section-header">
+          <h2>المكتبة الشخصية</h2>
+          <button class="btn-icon" id="menuToggleLibrary">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+        
+        <div class="tabs">
+          <button class="tab active" data-tab="saved">المحفوظات</button>
+          <button class="tab" data-tab="continue">أكمل القراءة</button>
+          <button class="tab" data-tab="history">سجل المشاهدة</button>
+        </div>
 
-        // معالجة تسجيل الدخول الناجح
-        async function handleAuthSuccess(user) {
-            currentUser = user;
-            isGuest = false;
-            
-            // التحقق من صلاحية الإدارة
-            await checkAdminStatus();
-            
-            // تحميل قوائم المستخدم
-            await loadUserLists();
-            
-            // تحديث واجهة المستخدم
-            updateUIForUser();
-            
-            // إخفاء شاشة تسجيل الدخول
-            document.getElementById('auth-screen').style.display = 'none';
-            
-            // تحميل المحتوى
-            await loadManhwas();
-            
-            // إظهار الصفحة الرئيسية
-            document.getElementById('home-page').style.display = 'block';
-        }
+        <div class="tab-content active" data-content="saved">
+          <div class="manga-grid" id="savedManga"></div>
+        </div>
 
-        // الدخول كزائر
-        async function signInAsGuest() {
-            isGuest = true;
-            currentUser = { 
-                id: 'guest', 
-                email: 'guest@zkd.com', 
-                user_metadata: { full_name: 'زائر' } 
-            };
-            
-            // تحميل قوائم المستخدم من localStorage
-            loadUserListsFromStorage();
-            
-            // إخفاء شاشة تسجيل الدخول
-            document.getElementById('auth-screen').style.display = 'none';
-            
-            // تحميل المحتوى
-            await loadManhwas();
-            
-            // إظهار الصفحة الرئيسية
-            document.getElementById('home-page').style.display = 'block';
-            
-            // تحديث واجهة المستخدم
-            updateUIForUser();
-        }
+        <div class="tab-content" data-content="continue">
+          <div class="chapters-grid" id="continueReading"></div>
+        </div>
 
-        // تسجيل الدخول بحساب Google
-        async function signInWithGoogle() {
-            try {
-                const { data, error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: window.location.origin
-                    }
-                });
-                
-                if (error) {
-                    console.error('خطأ في تسجيل الدخول:', error.message);
-                    alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
-                }
-            } catch (error) {
-                console.error('خطأ في تسجيل الدخول:', error.message);
-                alert('حدث خطأ أثناء تسجيل الدخول: ' + error.message);
-            }
-        }
+        <div class="tab-content" data-content="history">
+          <div class="chapters-grid" id="readingHistory"></div>
+        </div>
+      </section>
 
-        // تسجيل الخروج
-        async function signOut() {
-            try {
-                if (!isGuest) {
-                    const { error } = await supabase.auth.signOut();
-                    if (error) throw error;
-                }
-                
-                handleSignOut();
-            } catch (error) {
-                console.error('خطأ في تسجيل الخروج:', error.message);
-            }
-        }
+      <!-- الصفحة: الحساب -->
+      <section class="view" data-view="account">
+        <div class="section-header">
+          <h2>حسابي</h2>
+          <button class="btn-icon" id="menuToggleAccount">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+        
+        <div class="profile-card">
+          <div class="profile-row">
+            <div class="avatar" id="profileAvatar">U</div>
+            <div>
+              <h3 id="profileName">زائر</h3>
+              <p class="muted" id="profileRole">Guest</p>
+            </div>
+          </div>
+          <div class="stats" id="profileStats"></div>
+          <div class="profile-actions" id="profileActions">
+            <button class="btn-secondary" id="openLogin">تسجيل الدخول</button>
+            <button class="btn-primary" id="openRegister">إنشاء حساب</button>
+          </div>
+        </div>
 
-        // معالجة تسجيل الخروج
-        function handleSignOut() {
-            currentUser = null;
-            isAdmin = false;
-            isGuest = false;
-            
-            // إعادة تعيين الواجهة
-            document.getElementById('auth-screen').style.display = 'flex';
-            document.getElementById('home-page').style.display = 'none';
-            document.getElementById('manhwa-detail').style.display = 'none';
-            document.getElementById('settings-page').style.display = 'none';
-            document.getElementById('admin-panel').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'none';
-            
-            // إعادة تعيين الصفحة النشطة
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.querySelector('.nav-item:nth-child(1)').classList.add('active');
-        }
+        <div class="team-profile card" id="teamProfile" hidden>
+          <!-- محتوى بروفايل الفريق -->
+        </div>
+      </section>
 
-        // تحميل المانهوا من Supabase
-        async function loadManhwas() {
-            try {
-                console.log('جاري تحميل المانهوا من Supabase...');
-                
-                const { data, error } = await supabase
-                    .from('manhwas')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    console.error('خطأ في تحميل المانهوا:', error.message);
-                    return;
-                }
-                
-                if (data && data.length > 0) {
-                    manhwas = data;
-                    renderManhwas(manhwas);
-                    console.log('تم تحميل ' + data.length + ' مانهوا');
-                    
-                    // تحديث إحصائيات لوحة التحكم إذا كان المستخدم مديراً
-                    if (isAdmin) {
-                        updateAdminStats();
-                    }
-                } else {
-                    console.log('لا توجد مانهوا في قاعدة البيانات');
-                    renderEmptyState();
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل المانهوا:', error.message);
-                renderEmptyState();
-            }
-        }
+      <!-- الصفحة: الإعدادات -->
+      <section class="view" data-view="settings">
+        <div class="section-header">
+          <h2>الإعدادات</h2>
+          <button class="btn-icon" id="menuToggleSettings">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+        
+        <div class="settings-list card">
+          <div class="setting-item">
+            <div class="setting-info">
+              <i class="ri-moon-line"></i>
+              <span>الوضع الليلي</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="darkModeToggle" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <i class="ri-download-line"></i>
+              <span>التنزيل التلقائي</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="autoDownloadToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <i class="ri-wifi-line"></i>
+              <span>القراءة بدون اتصال</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="offlineReadingToggle">
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <i class="ri-notification-line"></i>
+              <span>الإشعارات</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="notificationsToggle" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
 
-        // عرض حالة عدم وجود محتوى
-        function renderEmptyState() {
-            const container = document.getElementById('manhwa-container');
-            container.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                    <i class="fas fa-book-open" style="font-size: 50px; margin-bottom: 20px; opacity: 0.5;"></i>
-                    <p>لا توجد مانهوا متاحة حالياً</p>
-                    ${isAdmin ? '<button class="action-btn" onclick="showAddManhwaForm()" style="margin-top: 20px;">إضافة مانهوا</button>' : ''}
-                </div>
-            `;
-        }
+      <!-- الصفحة: لوحة التحكم (للمسؤول) -->
+      <section class="view" data-view="admin-panel">
+        <div class="section-header">
+          <h2>لوحة التحكم</h2>
+          <button class="btn-icon" id="menuToggleAdmin">
+            <i class="ri-menu-line"></i>
+          </button>
+        </div>
+        
+        <div class="admin-dashboard">
+          <div class="admin-stats">
+            <div class="admin-stat">
+              <div class="stat-value" id="totalManga">0</div>
+              <div class="stat-label">المانغا</div>
+            </div>
+            <div class="admin-stat">
+              <div class="stat-value" id="totalChapters">0</div>
+              <div class="stat-label">الفصول</div>
+            </div>
+            <div class="admin-stat">
+              <div class="stat-value" id="totalUsers">0</div>
+              <div class="stat-label">المستخدمين</div>
+            </div>
+            <div class="admin-stat">
+              <div class="stat-value" id="totalTeams">0</div>
+              <div class="stat-label">الفرق</div>
+            </div>
+          </div>
+          
+          <div class="admin-actions">
+            <h3>الإجراءات السريعة</h3>
+            <div class="action-buttons">
+              <button class="btn-primary" id="addMangaBtn">
+                <i class="ri-add-line"></i> إضافة مانغا
+              </button>
+              <button class="btn-primary" id="addChapterBtn">
+                <i class="ri-file-add-line"></i> إضافة فصل
+              </button>
+              <button class="btn-secondary" id="manageUsersBtn">
+                <i class="ri-user-settings-line"></i> إدارة المستخدمين
+              </button>
+              <button class="btn-secondary" id="manageTeamsBtn">
+                <i class="ri-team-line"></i> إدارة الفرق
+              </button>
+            </div>
+          </div>
+          
+          <div class="recent-activity card">
+            <h3>آخر النشاطات</h3>
+            <div class="activity-list" id="adminActivityList"></div>
+          </div>
+        </div>
+      </section>
 
-        // عرض المانهوا في الشبكة
-        function renderManhwas(manhwasToRender) {
-            const container = document.getElementById('manhwa-container');
-            container.innerHTML = '';
-            
-            if (manhwasToRender.length === 0) {
-                renderEmptyState();
-                return;
-            }
-            
-            manhwasToRender.forEach(manhwa => {
-                const card = document.createElement('div');
-                card.className = 'manhwa-card';
-                card.onclick = () => showManhwaDetails(manhwa);
-                
-                // التحقق إذا كانت المانهوا في قوائم المستخدم
-                const isWatching = userLists.watching.some(m => m.id === manhwa.id);
-                const isWatchLater = userLists.watchLater.some(m => m.id === manhwa.id);
-                
-                card.innerHTML = `
-                    ${manhwa.status === 'new' ? '<div class="manhwa-badge">جديد</div>' : ''}
-                    ${isWatching ? '<div class="manhwa-badge" style="left: auto; right: 10px; background: var(--success-color);">أشاهدها</div>' : ''}
-                    ${isWatchLater ? '<div class="manhwa-badge" style="left: auto; right: 10px; background: var(--warning-color);">محفوظة</div>' : ''}
-                    <img src="${manhwa.cover_url || 'https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا'}" alt="${manhwa.title}" onerror="this.src='https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا'">
-                    <div class='manhwa-info'>
-                        <div class='manhwa-title'>${manhwa.title}</div>
-                        <div class='manhwa-chapter'>الفصل ${manhwa.latest_chapter || 1}</div>
-                    </div>
-                `;
-                
-                container.appendChild(card);
-            });
-        }
+      <!-- الصفحة: القارئ -->
+      <section class="view reader-view" data-view="reader">
+        <div class="reader-topbar">
+          <button class="btn-icon" data-action="back-from-reader" title="رجوع">
+            <i class="ri-arrow-right-line"></i>
+          </button>
+          <div class="reader-titles">
+            <strong id="readerMangaTitle">—</strong>
+            <span class="muted" id="readerChapterTitle">—</span>
+          </div>
+          <div class="reader-actions">
+            <button class="btn-icon" id="zoomOut" title="تصغير"><i class="ri-zoom-out-line"></i></button>
+            <button class="btn-icon" id="zoomIn" title="تكبير"><i class="ri-zoom-in-line"></i></button>
+            <button class="btn-icon" id="fitMode" title="ملاءمة"><i class="ri-aspect-ratio-line"></i></button>
+            <button class="btn-icon" id="toggleTheme" title="وضع الليل"><i class="ri-moon-line"></i></button>
+            <button class="btn-icon" id="prevChapter" title="السابق"><i class="ri-arrow-left-line"></i></button>
+            <button class="btn-icon" id="nextChapter" title="التالي"><i class="ri-arrow-right-line"></i></button>
+            <button class="btn-icon" id="readerSettings" title="الإعدادات"><i class="ri-settings-3-line"></i></button>
+          </div>
+        </div>
+        <div class="reader-canvas" id="readerCanvas"></div>
+      </section>
+    </main>
 
-        // البحث في المانهوا
-        function searchManhwa(query) {
-            if (!query.trim()) {
-                renderManhwas(manhwas);
-                return;
-            }
-            
-            const filtered = manhwas.filter(manhwa => 
-                manhwa.title.toLowerCase().includes(query.toLowerCase()) ||
-                (manhwa.tags && manhwa.tags.toLowerCase().includes(query.toLowerCase()))
-            );
-            
-            renderManhwas(filtered);
-        }
+    <!-- شريط التنقل السفلي -->
+    <nav class="bottom-nav">
+      <a href="#" class="nav-item active" data-nav="home">
+        <i class="ri-home-5-line"></i>
+        <span>الرئيسية</span>
+      </a>
+      <a href="#" class="nav-item" data-nav="categories">
+        <i class="ri-apps-line"></i>
+        <span>الأقسام</span>
+      </a>
+      <a href="#" class="nav-item" data-nav="manga-list">
+        <i class="ri-book-2-line"></i>
+        <span>المانغا</span>
+      </a>
+      <a href="#" class="nav-item" data-nav="library">
+        <i class="ri-bookmark-line"></i>
+        <span>المكتبة</span>
+      </a>
+      <a href="#" class="nav-item" data-nav="account">
+        <i class="ri-user-line"></i>
+        <span>حسابي</span>
+      </a>
+    </nav>
+  </div>
 
-        // تغيير التبويب
-        function changeTab(element, tabId) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            element.classList.add('active');
-            
-            // تصفية المانهوا حسب التبويب
-            let filtered = manhwas;
-            
-            switch(tabId) {
-                case 'popular':
-                    filtered = [...manhwas].sort((a, b) => (b.views || 0) - (a.views || 0));
-                    break;
-                case 'latest':
-                    filtered = [...manhwas].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                    break;
-                case 'action':
-                    filtered = manhwas.filter(m => m.tags && m.tags.includes('أكشن'));
-                    break;
-                case 'romance':
-                    filtered = manhwas.filter(m => m.tags && m.tags.includes('رومانسي'));
-                    break;
-            }
-            
-            renderManhwas(filtered);
-        }
+  <!-- نوافذ التسجيل -->
+  <div class="modal" id="loginModal">
+    <!-- محتوى نافذة تسجيل الدخول -->
+  </div>
 
-        // عرض تفاصيل المانهوا
-        async function showManhwaDetails(manhwa) {
-            currentManhwa = manhwa;
-            
-            // إخفاء الصفحة الرئيسية وإظهار صفحة التفاصيل
-            document.getElementById('home-page').style.display = 'none';
-            document.getElementById('manhwa-detail').style.display = 'block';
-            
-            // تعبئة البيانات
-            document.getElementById('detail-cover').src = manhwa.cover_url || 'https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا';
-            document.getElementById('detail-title').textContent = manhwa.title;
-            document.getElementById('detail-status').textContent = manhwa.status === 'completed' ? 'مكتملة' : 'مستمرة';
-            document.getElementById('detail-chapters').textContent = `الفصول: ${manhwa.latest_chapter || 1}`;
-            document.getElementById('detail-views').textContent = `المشاهدات: ${manhwa.views || 0}`;
-            document.getElementById('detail-description').textContent = manhwa.description || 'لا يوجد وصف متاح';
-            
-            // عرض التصنيفات
-            const tagsContainer = document.getElementById('detail-tags');
-            tagsContainer.innerHTML = '';
-            
-            if (manhwa.tags) {
-                manhwa.tags.split(',').forEach(tag => {
-                    const tagElement = document.createElement('span');
-                    tagElement.className = 'tag';
-                    tagElement.textContent = tag.trim();
-                    tagsContainer.appendChild(tagElement);
-                });
-            }
-            
-            // تحديث أزرار الحالة
-            updateManhwaActionButtons();
-            
-            // تحميل وعرض الفصول
-            await loadChapters(manhwa.id);
-            
-            // تحميل التعليقات
-            await loadComments(manhwa.id);
-        }
+  <div class="modal" id="registerModal">
+    <!-- محتوى نافذة التسجيل -->
+  </div>
 
-        // تحديث أزرار حالة المانهوا
-        function updateManhwaActionButtons() {
-            if (!currentManhwa) return;
-            
-            const isWatching = userLists.watching.some(m => m.id === currentManhwa.id);
-            const isWatchLater = userLists.watchLater.some(m => m.id === currentManhwa.id);
-            
-            const watchLaterBtn = document.getElementById('watch-later-btn');
-            const watchingBtn = document.getElementById('watching-btn');
-            
-            if (isWatchLater) {
-                watchLaterBtn.innerHTML = '<i class="fas fa-bookmark"></i> إزالة من المحفوظات';
-                watchLaterBtn.classList.add('active');
-            } else {
-                watchLaterBtn.innerHTML = '<i class="far fa-bookmark"></i> أشاهدها لاحقاً';
-                watchLaterBtn.classList.remove('active');
-            }
-            
-            if (isWatching) {
-                watchingBtn.innerHTML = '<i class="fas fa-eye"></i> توقف عن المشاهدة';
-                watchingBtn.classList.add('active');
-            } else {
-                watchingBtn.innerHTML = '<i class="far fa-eye"></i> أشاهدها الآن';
-                watchingBtn.classList.remove('active');
-            }
-        }
+  <!-- نافذة إضافة مانغا (للمسؤول) -->
+  <div class="modal" id="addMangaModal">
+    <!-- محتوى نافذة إضافة مانغا -->
+  </div>
 
-        // تبديل حالة "أشاهدها لاحقاً"
-        async function toggleWatchLater() {
-            if (!currentManhwa) return;
-            
-            const index = userLists.watchLater.findIndex(m => m.id === currentManhwa.id);
-            
-            if (index === -1) {
-                // إضافة إلى القائمة
-                userLists.watchLater.push(currentManhwa);
-                
-                // إزالة من قائمة "أشاهدها" إذا كانت موجودة
-                const watchingIndex = userLists.watching.findIndex(m => m.id === currentManhwa.id);
-                if (watchingIndex !== -1) {
-                    userLists.watching.splice(watchingIndex, 1);
-                }
-            } else {
-                // إزالة من القائمة
-                userLists.watchLater.splice(index, 1);
-            }
-            
-            // حفظ التغييرات
-            await saveUserLists();
-            
-            // تحديث الواجهة
-            updateManhwaActionButtons();
-            updateProfileStats();
-        }
-
-        // تبديل حالة "أشاهدها الآن"
-        async function toggleWatching() {
-            if (!currentManhwa) return;
-            
-            const index = userLists.watching.findIndex(m => m.id === currentManhwa.id);
-            
-            if (index === -1) {
-                // إضافة إلى القائمة
-                userLists.watching.push(currentManhwa);
-                
-                // إزالة من قائمة "أشاهدها لاحقاً" إذا كانت موجودة
-                const watchLaterIndex = userLists.watchLater.findIndex(m => m.id === currentManhwa.id);
-                if (watchLaterIndex !== -1) {
-                    userLists.watchLater.splice(watchLaterIndex, 1);
-                }
-            } else {
-                // إزالة من القائمة
-                userLists.watching.splice(index, 1);
-            }
-            
-            // حفظ التغييرات
-            await saveUserLists();
-            
-            // تحديث الواجهة
-            updateManhwaActionButtons();
-            updateProfileStats();
-        }
-
-        // تحميل فصول المانهوا
-        async function loadChapters(manhwaId) {
-            try {
-                const { data, error } = await supabase
-                    .from('chapters')
-                    .select('*')
-                    .eq('manhwa_id', manhwaId)
-                    .order('chapter_number', { ascending: false });
-                
-                if (error) throw error;
-                
-                const chaptersList = document.getElementById('chapters-list');
-                chaptersList.innerHTML = '';
-                
-                if (data && data.length > 0) {
-                    data.forEach(chapter => {
-                        const chapterItem = document.createElement('div');
-                        chapterItem.className = 'chapter-item';
-                        
-                        // التحقق إذا كان الفصل مقروءاً
-                        const isRead = userLists.completed.some(c => 
-                            c.chapterId === chapter.id && c.manhwaId === manhwaId
-                        );
-                        
-                        chapterItem.innerHTML = `
-                            <div class="chapter-info">
-                                <div class="chapter-status ${isRead ? 'read' : ''}">${isRead ? '✓' : ''}</div>
-                                <div>
-                                    <strong>الفصل ${chapter.chapter_number}</strong>
-                                    <div>${new Date(chapter.created_at).toLocaleDateString('ar-EG')}</div>
-                                </div>
-                            </div>
-                            <div class="chapter-actions">
-                                <button class="action-btn" onclick="readChapter(${chapter.id})">
-                                    <i class="fas fa-book-reader"></i> قراءة
-                                </button>
-                                <button class="action-btn" onclick="downloadChapter(${chapter.id})">
-                                    <i class="fas fa-download"></i> تحميل
-                                </button>
-                            </div>
-                        `;
-                        
-                        chaptersList.appendChild(chapterItem);
-                    });
-                } else {
-                    chaptersList.innerHTML = '<p>لا توجد فصول متاحة حالياً</p>';
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل الفصول:', error.message);
-                document.getElementById('chapters-list').innerHTML = '<p>حدث خطأ في تحميل الفصول</p>';
-            }
-        }
-
-        // تحميل التعليقات
-        async function loadComments(manhwaId) {
-            try {
-                // استخدام بيانات تجريبية للتعليقات
-                const demoComments = [
-                    {
-                        id: 1,
-                        content: "مانهوا رائعة! أنصح الجميع بقراءتها.",
-                        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-                        user: {
-                            username: "قارئ متحمس",
-                            avatar_url: null
-                        }
-                    },
-                    {
-                        id: 2,
-                        content: "الفصل الأخير كان مذهلاً، لا يمكنني الانتظار للفصل القادم!",
-                        created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-                        user: {
-                            username: "محب المانهوا",
-                            avatar_url: null
-                        }
-                    }
-                ];
-                
-                const commentsContainer = document.getElementById('comments-container');
-                commentsContainer.innerHTML = '';
-                
-                if (demoComments.length > 0) {
-                    demoComments.forEach(comment => {
-                        const commentItem = document.createElement('div');
-                        commentItem.className = 'comment-item';
-                        
-                        const authorName = comment.user?.username || 'مستخدم';
-                        const avatarText = authorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                        
-                        commentItem.innerHTML = `
-                            <div class="comment-header">
-                                <div class="comment-avatar">${avatarText}</div>
-                                <div class="comment-author">${authorName}</div>
-                                <div class="comment-time">${formatTime(comment.created_at)}</div>
-                            </div>
-                            <div class="comment-content">${comment.content}</div>
-                            <div class="comment-actions">
-                                <span class="comment-action" onclick="likeComment(${comment.id})">
-                                    <i class="far fa-thumbs-up"></i> أعجبني
-                                </span>
-                                <span class="comment-action" onclick="reportComment(${comment.id})">
-                                    <i class="far fa-flag"></i> بلغ
-                                </span>
-                            </div>
-                        `;
-                        
-                        commentsContainer.appendChild(commentItem);
-                    });
-                } else {
-                    commentsContainer.innerHTML = '<p>لا توجد تعليقات بعد. كن أول من يعلق!</p>';
-                }
-            } catch (error) {
-                console.error('خطأ في تحميل التعليقات:', error.message);
-                document.getElementById('comments-container').innerHTML = '<p>حدث خطأ في تحميل التعليقات</p>';
-            }
-        }
-
-        // تنسيق الوقت
-        function formatTime(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-            
-            if (minutes < 1) return 'الآن';
-            if (minutes < 60) return `منذ ${minutes} دقيقة`;
-            if (hours < 24) return `منذ ${hours} ساعة`;
-            if (days < 7) return `منذ ${days} يوم`;
-            
-            return date.toLocaleDateString('ar-EG');
-        }
-
-        // إضافة تعليق
-        async function addComment() {
-            if (!currentManhwa) return;
-            
-            const commentInput = document.getElementById('comment-input');
-            const content = commentInput.value.trim();
-            
-            if (!content) {
-                alert('يرجى كتابة تعليق');
-                return;
-            }
-            
-            if (!currentUser) {
-                alert('يجب تسجيل الدخول لإضافة تعليق');
-                return;
-            }
-            
-            try {
-                // استخدام بيانات تجريبية لإضافة التعليق
-                const newComment = {
-                    id: Date.now(),
-                    content: content,
-                    created_at: new Date().toISOString(),
-                    user: {
-                        username: currentUser.user_metadata?.full_name || currentUser.email.split('@')[0],
-                        avatar_url: null
-                    }
-                };
-                
-                // إضافة التعليق إلى واجهة المستخدم مباشرة
-                const commentsContainer = document.getElementById('comments-container');
-                const commentItem = document.createElement('div');
-                commentItem.className = 'comment-item';
-                
-                const authorName = newComment.user.username;
-                const avatarText = authorName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                
-                commentItem.innerHTML = `
-                    <div class="comment-header">
-                        <div class="comment-avatar">${avatarText}</div>
-                        <div class="comment-author">${authorName}</div>
-                        <div class="comment-time">الآن</div>
-                    </div>
-                    <div class="comment-content">${newComment.content}</div>
-                    <div class="comment-actions">
-                        <span class="comment-action" onclick="likeComment(${newComment.id})">
-                            <i class="far fa-thumbs-up"></i> أعجبني
-                        </span>
-                        <span class="comment-action" onclick="deleteComment(${newComment.id})">
-                            <i class="fas fa-trash"></i> حذف
-                        </span>
-                        <span class="comment-action" onclick="reportComment(${newComment.id})">
-                            <i class="far fa-flag"></i> بلغ
-                        </span>
-                    </div>
-                `;
-                
-                commentsContainer.prepend(commentItem);
-                
-                // مسح حقل الإدخال
-                commentInput.value = '';
-                
-                // إظهار رسالة نجاح
-                alert('تم إضافة التعليق بنجاح!');
-                
-            } catch (error) {
-                console.error('خطأ في إضافة التعليق:', error.message);
-                alert('حدث خطأ في إضافة التعليق: ' + error.message);
-            }
-        }
-
-        // حذف التعليق
-        async function deleteComment(commentId) {
-            if (!confirm('هل أنت متأكد من حذف هذا التعليق؟ لا يمكن التراجع عن هذا الإجراء.')) return;
-            
-            try {
-                // إزالة التعليق من الواجهة
-                const commentElement = document.querySelector(`[onclick="deleteComment(${commentId})"]`).closest('.comment-item');
-                if (commentElement) {
-                    commentElement.remove();
-                }
-                
-                alert('تم حذف التعليق بنجاح');
-            } catch (error) {
-                console.error('خطأ في حذف التعليق:', error.message);
-                alert('حدث خطأ في حذف التعليق: ' + error.message);
-            }
-        }
-
-        // الإعجاب بالتعليق
-        async function likeComment(commentId) {
-            if (!currentUser) {
-                alert('يجب تسجيل الدخول للإعجاب بالتعليق');
-                return;
-            }
-            
-            try {
-                alert('تم الإعجاب بالتعليق بنجاح');
-            } catch (error) {
-                console.error('خطأ في الإعجاب بالتعليق:', error.message);
-                alert('حدث خطأ في الإعجاب بالتعليق: ' + error.message);
-            }
-        }
-
-        // الإبلاغ عن التعليق
-        async function reportComment(commentId) {
-            if (!currentUser) {
-                alert('يجب تسجيل الدخول للإبلاغ عن التعليق');
-                return;
-            }
-            
-            const reason = prompt('يرجى إدخال سبب الإبلاغ عن هذا التعليق:');
-            if (!reason) return;
-            
-            try {
-                alert('تم الإبلاغ عن التعليق بنجاح، شكراً لك على مساعدتنا في الحفاظ على المجتمع');
-            } catch (error) {
-                console.error('خطأ في الإبلاغ عن التعليق:', error.message);
-                alert('حدث خطأ في الإبلاغ عن التعليق: ' + error.message);
-            }
-        }
-
-        // الرجوع من صفحة التفاصيل
-        function goBack() {
-            document.getElementById('manhwa-detail').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'none';
-            document.getElementById('settings-page').style.display = 'none';
-            document.getElementById('home-page').style.display = 'block';
-        }
-
-        // قراءة الفصل
-        async function readChapter(chapterId) {
-            try {
-                // استخدام بيانات تجريبية للفصل
-                currentChapter = {
-                    id: chapterId,
-                    chapter_number: 1,
-                    pages: []
-                };
-                
-                // إنشاء صفحات تجريبية
-                for (let i = 1; i <= 10; i++) {
-                    currentChapter.pages.push({
-                        id: i,
-                        image_url: `https://via.placeholder.com/400x600/333/cccccc?text=صفحة+${i}+من+${currentManhwa.title}`
-                    });
-                }
-                
-                currentPage = 0;
-                
-                // فتح القارئ
-                openReader(currentManhwa, currentChapter);
-                
-            } catch (error) {
-                console.error('خطأ في تحميل الفصل:', error.message);
-                alert('حدث خطأ في تحميل الفصل: ' + error.message);
-            }
-        }
-
-        // تحميل الفصل
-        async function downloadChapter(chapterId) {
-            try {
-                alert(`سيتم تحميل الفصل ${chapterId} من ${currentManhwa.title}`);
-            } catch (error) {
-                console.error('خطأ في تحميل الفصل:', error.message);
-                alert('حدث خطأ في تحميل الفصل: ' + error.message);
-            }
-        }
-
-        // فتح القارئ
-        function openReader(manhwa, chapter) {
-            currentChapter = chapter;
-            currentPage = 0;
-            
-            document.getElementById('reader-title').textContent = `${manhwa.title} - الفصل ${chapter.chapter_number}`;
-            document.getElementById('reader').style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            
-            // تحميل الصفحات
-            loadChapterPages(manhwa, chapter);
-        }
-
-        // تحميل صفحات الفصل
-        function loadChapterPages(manhwa, chapter) {
-            const readerContent = document.getElementById('reader-content');
-            readerContent.innerHTML = '';
-            
-            chapter.pages.forEach(page => {
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'reader-page';
-                pageDiv.innerHTML = `<img src="${page.image_url}" alt="صفحة ${page.id}" onerror="this.src='https://via.placeholder.com/400x600/333/cccccc?text=صفحة+${page.id}'">`;
-                readerContent.appendChild(pageDiv);
-            });
-            
-            // التمرير إلى الصفحة الأولى
-            readerContent.scrollTo(0, 0);
-        }
-
-        // الصفحة التالية في القارئ
-        function nextPage() {
-            const readerContent = document.getElementById('reader-content');
-            const pageHeight = readerContent.clientHeight;
-            const scrollPos = readerContent.scrollTop;
-            const totalHeight = readerContent.scrollHeight;
-            
-            if (scrollPos + pageHeight >= totalHeight - 50) {
-                // نهاية الفصل، عرض زر الفصل التالي
-                document.getElementById('reader-next-chapter').style.display = 'block';
-            } else {
-                readerContent.scrollBy(0, pageHeight);
-                currentPage++;
-            }
-        }
-
-        // الصفحة السابقة في القارئ
-        function prevPage() {
-            const readerContent = document.getElementById('reader-content');
-            const pageHeight = readerContent.clientHeight;
-            
-            if (readerContent.scrollTop <= 0) {
-                // بداية الفصل، لا يمكن الرجوع أكثر
-                return;
-            }
-            
-            readerContent.scrollBy(0, -pageHeight);
-            currentPage--;
-            document.getElementById('reader-next-chapter').style.display = 'none';
-        }
-
-        // تحميل الفصل التالي
-        async function loadNextChapter() {
-            if (!currentManhwa || !currentChapter) return;
-            
-            try {
-                // استخدام بيانات تجريبية للفصل التالي
-                const nextChapter = {
-                    id: currentChapter.id + 1,
-                    chapter_number: currentChapter.chapter_number + 1,
-                    pages: []
-                };
-                
-                // إنشاء صفحات تجريبية للفصل التالي
-                for (let i = 1; i <= 10; i++) {
-                    nextChapter.pages.push({
-                        id: i,
-                        image_url: `https://via.placeholder.com/400x600/333/cccccc?text=صفحة+${i}+من+الفصل+${nextChapter.chapter_number}`
-                    });
-                }
-                
-                // تحميل الفصل التالي
-                currentChapter = nextChapter;
-                currentPage = 0;
-                
-                // إخفاء زر الفصل التالي
-                document.getElementById('reader-next-chapter').style.display = 'none';
-                
-                // تحديث العنوان
-                document.getElementById('reader-title').textContent = `${currentManhwa.title} - الفصل ${currentChapter.chapter_number}`;
-                
-                // تحميل الصفحات
-                loadChapterPages(currentManhwa, currentChapter);
-                
-            } catch (error) {
-                console.error('خطأ في تحميل الفصل التالي:', error.message);
-                alert('حدث خطأ في تحميل الفصل التالي: ' + error.message);
-            }
-        }
-
-        // إغلاق القارئ
-        function closeReader() {
-            document.getElementById('reader').style.display = 'none';
-            document.body.style.overflow = 'auto';
-            
-            // وضع علامة على الفصل كمقروء
-            markChapterAsRead();
-        }
-
-        // وضع علامة على الفصل كمقروء
-        async function markChapterAsRead() {
-            if (!currentManhwa || !currentChapter) return;
-            
-            // التحقق إذا كان الفصل مقروءاً بالفعل
-            const isAlreadyRead = userLists.completed.some(c => 
-                c.manhwaId === currentManhwa.id && c.chapterId === currentChapter.id
-            );
-            
-            if (!isAlreadyRead) {
-                // إضافة إلى قائمة الفصول المكتملة
-                userLists.completed.push({
-                    manhwaId: currentManhwa.id,
-                    chapterId: currentChapter.id,
-                    chapterNumber: currentChapter.chapter_number,
-                    readAt: new Date().toISOString()
-                });
-                
-                // حفظ التغييرات
-                await saveUserLists();
-                
-                // تحديث الإحصائيات
-                updateProfileStats();
-            }
-        }
-
-        // تحديث واجهة المستخدم بعد تسجيل الدخول
-        function updateUIForUser() {
-            const userAvatar = document.getElementById('user-avatar');
-            const profileAvatar = document.getElementById('profile-avatar-text');
-            const profileName = document.getElementById('profile-name');
-            const profileEmail = document.getElementById('profile-email');
-            const loginMethod = document.getElementById('settings-login-method');
-            const settingsEmail = document.getElementById('settings-email');
-            
-            if (currentUser) {
-                // استخدام الأحرف الأولى من الاسم إذا كان متوفراً
-                const userName = currentUser.user_metadata?.full_name || currentUser.email;
-                const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
-                
-                userAvatar.innerHTML = isGuest ? '<i class="fas fa-user"></i>' : initials.substring(0, 2);
-                userAvatar.title = userName;
-                
-                profileAvatar.textContent = isGuest ? 'ز' : initials.substring(0, 2);
-                profileName.textContent = userName;
-                profileEmail.textContent = currentUser.email;
-                settingsEmail.textContent = currentUser.email;
-                
-                loginMethod.textContent = isGuest ? 'زائر' : 'Google';
-            } else {
-                userAvatar.innerHTML = '<i class="fas fa-user"></i>';
-                userAvatar.title = 'تسجيل الدخول';
-            }
-            
-            // تحديث إحصائيات البروفايل
-            updateProfileStats();
-        }
-
-        // تحديث إحصائيات البروفايل
-        function updateProfileStats() {
-            document.getElementById('stat-watching').textContent = userLists.watching.length;
-            document.getElementById('stat-watch-later').textContent = userLists.watchLater.length;
-            document.getElementById('stat-completed').textContent = userLists.completed.length;
-            
-            // تحديث قوائم البروفايل
-            updateProfileLists();
-        }
-
-        // تحديث قوائم البروفايل
-        function updateProfileLists() {
-            // قائمة "أشاهدها الآن"
-            const watchingList = document.getElementById('watching-list');
-            watchingList.innerHTML = '';
-            
-            userLists.watching.slice(0, 4).forEach(manhwa => {
-                const item = document.createElement('div');
-                item.className = 'profile-list-item';
-                item.onclick = () => showManhwaDetails(manhwa);
-                
-                item.innerHTML = `
-                    <img src="${manhwa.cover_url || 'https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا'}" alt="${manhwa.title}">
-                    <div class="profile-list-item-info">
-                        <div class="profile-list-item-title">${manhwa.title}</div>
-                        <div class="profile-list-item-chapter">الفصل ${manhwa.latest_chapter || 1}</div>
-                    </div>
-                `;
-                
-                watchingList.appendChild(item);
-            });
-            
-            if (userLists.watching.length === 0) {
-                watchingList.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 20px;">لا توجد مانهوا في هذه القائمة</p>';
-            }
-            
-            // قائمة "سأشاهدها لاحقاً"
-            const watchLaterList = document.getElementById('watch-later-list');
-            watchLaterList.innerHTML = '';
-            
-            userLists.watchLater.slice(0, 4).forEach(manhwa => {
-                const item = document.createElement('div');
-                item.className = 'profile-list-item';
-                item.onclick = () => showManhwaDetails(manhwa);
-                
-                item.innerHTML = `
-                    <img src="${manhwa.cover_url || 'https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا'}" alt="${manhwa.title}">
-                    <div class="profile-list-item-info">
-                        <div class="profile-list-item-title">${manhwa.title}</div>
-                        <div class="profile-list-item-chapter">الفصل ${manhwa.latest_chapter || 1}</div>
-                    </div>
-                `;
-                
-                watchLaterList.appendChild(item);
-            });
-            
-            if (userLists.watchLater.length === 0) {
-                watchLaterList.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 20px;">لا توجد مانهوا في هذه القائمة</p>';
-            }
-        }
-
-        // تحميل قوائم المستخدم
-        async function loadUserLists() {
-            if (isGuest) {
-                loadUserListsFromStorage();
-                return;
-            }
-            
-            try {
-                // استخدام بيانات تجريبية للقوائم
-                userLists = {
-                    watching: manhwas.slice(0, 2),
-                    watchLater: manhwas.slice(2, 4),
-                    completed: []
-                };
-                
-            } catch (error) {
-                console.error('خطأ في تحميل قوائم المستخدم:', error.message);
-                // إنشاء قوائم جديدة في حالة الخطأ
-                userLists = {
-                    watching: [],
-                    watchLater: [],
-                    completed: []
-                };
-            }
-        }
-
-        // تحميل قوائم المستخدم من localStorage (للزوار)
-        function loadUserListsFromStorage() {
-            const savedLists = localStorage.getItem('guest_user_lists');
-            if (savedLists) {
-                userLists = JSON.parse(savedLists);
-            } else {
-                userLists = {
-                    watching: [],
-                    watchLater: [],
-                    completed: []
-                };
-                localStorage.setItem('guest_user_lists', JSON.stringify(userLists));
-            }
-        }
-
-        // حفظ قوائم المستخدم
-        async function saveUserLists() {
-            if (isGuest) {
-                localStorage.setItem('guest_user_lists', JSON.stringify(userLists));
-                return;
-            }
-            
-            // في التطبيق الكامل، سيتم حفظ القوائم في Supabase
-            console.log('تم حفظ قوائم المستخدم');
-        }
-
-        // التحقق من صلاحية المستخدم للإدارة
-        async function checkAdminStatus() {
-            if (!currentUser || isGuest) {
-                isAdmin = false;
-                return;
-            }
-            
-            // التحقق مما إذا كان البريد الإلكتروني للمستخدم موجوداً في القائمة المسموح بها
-            isAdmin = adminEmails.includes(currentUser.email);
-            console.log(`صلاحية الإدارة: ${isAdmin} للمستخدم: ${currentUser.email}`);
-        }
-
-        // التبديل إلى لوحة الإدارة
-        function toggleAdmin() {
-            const adminPanel = document.getElementById('admin-panel');
-            const homePage = document.getElementById('home-page');
-            const manhwaDetail = document.getElementById('manhwa-detail');
-            const settingsPage = document.getElementById('settings-page');
-            const profilePage = document.getElementById('profile-page');
-            
-            if (!isAdmin) {
-                alert('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
-                return;
-            }
-            
-            if (adminPanel.style.display === 'block') {
-                adminPanel.style.display = 'none';
-                homePage.style.display = 'block';
-            } else {
-                adminPanel.style.display = 'block';
-                homePage.style.display = 'none';
-                manhwaDetail.style.display = 'none';
-                settingsPage.style.display = 'none';
-                profilePage.style.display = 'none';
-                
-                // تحميل بيانات الإدارة
-                loadAdminData();
-            }
-        }
-
-        // تغيير تبويب الإدارة
-        function changeAdminTab(element, tabId) {
-            // إلغاء تنشيط جميع التبويبات
-            document.querySelectorAll('.admin-tab').forEach(tab => tab.classList.remove('active'));
-            
-            // تنشيط التبويب الحالي
-            if (element) {
-                element.classList.add('active');
-            } else {
-                document.querySelector(`.admin-tab[onclick*="${tabId}"]`).classList.add('active');
-            }
-            
-            // إخفاء جميع المحتويات
-            document.querySelectorAll('.admin-content').forEach(content => content.classList.remove('active'));
-            
-            // إظهار المحتوى المحدد
-            document.getElementById(`admin-${tabId}`).classList.add('active');
-        }
-
-        // تحميل بيانات الإدارة
-        async function loadAdminData() {
-            await updateAdminStats();
-        }
-
-        // تحديث إحصائيات لوحة التحكم
-        async function updateAdminStats() {
-            try {
-                // استخدام بيانات تجريبية للإحصائيات
-                document.getElementById('admin-total-manhwas').textContent = manhwas.length;
-                document.getElementById('admin-total-chapters').textContent = manhwas.length * 10; // تقديري
-                document.getElementById('admin-total-users').textContent = isGuest ? 100 : 150; // تقديري
-                document.getElementById('admin-total-views').textContent = '1.2K';
-                
-            } catch (error) {
-                console.error('خطأ في تحميل إحصائيات الإدارة:', error.message);
-            }
-        }
-
-        // معاينة صورة غلاف المانهوا
-        function previewManhwaCover(input) {
-            const preview = document.getElementById('cover-preview');
-            const previewImage = document.getElementById('preview-image');
-            
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    previewImage.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        // معاينة صفحات الفصل
-        function previewChapterPages(input) {
-            const preview = document.getElementById('pages-preview');
-            const previewList = document.getElementById('pages-preview-list');
-            
-            previewList.innerHTML = '';
-            
-            if (input.files && input.files.length > 0) {
-                for (let i = 0; i < Math.min(input.files.length, 6); i++) {
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.style.width = '100%';
-                        img.style.borderRadius = '4px';
-                        previewList.appendChild(img);
-                    }
-                    
-                    reader.readAsDataURL(input.files[i]);
-                }
-                
-                preview.style.display = 'block';
-            }
-        }
-
-        // إضافة مانهوا جديدة
-        async function addNewManhwa(form) {
-            try {
-                const formData = new FormData(form);
-                
-                // استخدام بيانات تجريبية
-                const newManhwa = {
-                    id: Date.now(),
-                    title: formData.get('title'),
-                    description: formData.get('description'),
-                    cover_url: 'https://via.placeholder.com/300x400/333/cccccc?text=صورة+المانهوا',
-                    tags: formData.get('tags'),
-                    status: formData.get('status'),
-                    latest_chapter: 1,
-                    views: 0,
-                    created_at: new Date().toISOString()
-                };
-                
-                // إضافة المانهوا إلى القائمة
-                manhwas.unshift(newManhwa);
-                
-                alert('تم إضافة المانهوا بنجاح!');
-                document.getElementById('cover-preview').style.display = 'none';
-                form.reset();
-                
-                // إعادة تحميل المانهوا
-                renderManhwas(manhwas);
-                
-            } catch (error) {
-                console.error('خطأ في إضافة المانهوا:', error.message);
-                alert('حدث خطأ أثناء إضافة المانهوا: ' + error.message);
-            }
-        }
-
-        // إضافة فصل جديد
-        async function addNewChapter(form) {
-            try {
-                const formData = new FormData(form);
-                const manhwaId = document.getElementById('chapter-manhwa-select').value;
-                
-                if (!manhwaId) {
-                    alert('يرجى اختيار المانهوا');
-                    return;
-                }
-                
-                // استخدام بيانات تجريبية
-                alert('تم إضافة الفصل بنجاح!');
-                document.getElementById('pages-preview').style.display = 'none';
-                form.reset();
-                
-            } catch (error) {
-                console.error('خطأ في إضافة الفصل:', error.message);
-                alert('حدث خطأ أثناء إضافة الفصل: ' + error.message);
-            }
-        }
-
-        // إرسال رسالة في محادثة الإداريين
-        async function sendAdminMessage() {
-            const input = document.getElementById('admin-chat-input');
-            const content = input.value.trim();
-            
-            if (!content) return;
-            
-            try {
-                // استخدام بيانات تجريبية للرسائل
-                const messagesContainer = document.getElementById('admin-chat-messages');
-                
-                const messageElement = document.createElement('div');
-                messageElement.className = 'chat-message self';
-                messageElement.innerHTML = `
-                    <div class="chat-message-sender">أنت</div>
-                    <div class="chat-message-content">${content}</div>
-                    <div class="chat-message-time">${formatTime(new Date())}</div>
-                `;
-                
-                messagesContainer.appendChild(messageElement);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                
-                // مسح حقل الإدخال
-                input.value = '';
-                
-            } catch (error) {
-                console.error('خطأ في إرسال الرسالة:', error.message);
-                alert('حدث خطأ في إرسال الرسالة: ' + error.message);
-            }
-        }
-
-        // عرض القسم المحدد
-        function showSection(section) {
-            document.getElementById('home-page').style.display = 'none';
-            document.getElementById('manhwa-detail').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'none';
-            document.getElementById('settings-page').style.display = 'none';
-            document.getElementById('admin-panel').style.display = 'none';
-            
-            if (section === 'home') {
-                document.getElementById('home-page').style.display = 'block';
-            } else if (section === 'settings') {
-                document.getElementById('settings-page').style.display = 'block';
-            }
-            
-            // تحديث التنقل السفلي
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        }
-
-        // عرض البروفايل
-        function showProfile() {
-            document.getElementById('home-page').style.display = 'none';
-            document.getElementById('manhwa-detail').style.display = 'none';
-            document.getElementById('settings-page').style.display = 'none';
-            document.getElementById('admin-panel').style.display = 'none';
-            document.getElementById('profile-page').style.display = 'block';
-        }
-
-        // عرض الإشارات المرجعية
-        function showBookmarks() {
-            alert('عرض المحفوظات');
-        }
-
-        // فتح/إغلاق القائمة الجانبية
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-        }
-
-        // إغلاق القائمة الجانبية
-        function closeSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('overlay');
-            
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        }
-
-        // تحديث الملف الشخصي
-        function updateProfile() {
-            const nameInput = document.getElementById('settings-name');
-            if (nameInput.value.trim()) {
-                document.getElementById('profile-name').textContent = nameInput.value;
-                document.getElementById('profile-avatar-text').textContent = nameInput.value.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                alert('تم تحديث الملف الشخصي بنجاح');
-            }
-        }
-
-        // مسح الذاكرة المؤقتة
-        function clearCache() {
-            alert('تم مسح الذاكرة المؤقتة بنجاح');
-        }
-
-        // تغيير الصورة الشخصية
-        function changeAvatar() {
-            alert('سيتم السماح باختيار صورة في التطبيق الكامل');
-        }
-    </script>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
