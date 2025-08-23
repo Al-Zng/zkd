@@ -273,6 +273,7 @@ body {
   transition: var(--transition);
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
 }
 
 .manga-card:hover, .chapter-card:hover {
@@ -308,6 +309,20 @@ body {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.manga-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #ffd700;
+  margin-top: 4px;
+}
+
+.manga-rating i {
+  font-size: 0.7rem;
 }
 
 /* Chapter card */
@@ -846,6 +861,44 @@ input:checked + .slider:before {
   text-decoration: none;
 }
 
+/* Search Panel */
+.search-panel {
+  margin-bottom: 20px;
+}
+
+.search-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.search-row input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  outline: none;
+  font-family: 'Tajawal', sans-serif;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.filters-row select {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  outline: none;
+  font-family: 'Tajawal', sans-serif;
+}
+
 /* Helpers */
 .loading {
   display: flex;
@@ -949,5 +1002,13 @@ input:checked + .slider:before {
   
   .action-buttons {
     grid-template-columns: 1fr;
+  }
+  
+  .filters-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .search-row {
+    flex-direction: column;
   }
 }
